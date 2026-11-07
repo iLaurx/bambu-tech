@@ -1,4 +1,16 @@
-# Diagnóstico inicial de la aplicación
+# Estado actual de Bambu Tech
+
+## Entrega del prompt 3 — panel integrado
+
+Implementación local terminada por el agente de panel y revisada por el coordinador. Rutas públicas exactas `/admin/login` y `/admin/recovery`; el resto de `/admin` conserva autorización y redirige al acceso si falta sesión. Las API mantienen verificación de servidor/RLS. El callback existente abre el formulario de contraseña en el panel; no se cambiaron contraseñas reales durante esta tarea.
+
+El panel consume el backend persistente: inventario completo, cuatro métricas del servidor, WhatsApp, crear/editar/eliminar lógicamente, controles independientes de visibilidad y agotado, descripción, especificaciones por categoría y portada más tres secundarias de hasta 4 MiB. Conserva borradores y cargas parciales ante errores. Permite reautenticación desde el diálogo sin cerrarlo y reconcilia altas ambiguas por UUID para continuar como edición. Formularios de credenciales usan POST y esperan JavaScript listo para evitar campos en URL antes de hidratación.
+
+Verificado: **17 pruebas locales** (12 backend y 5 panel), **13 grupos de navegador con servicios simulados**, tipos y compilación Webpack final aprobados. El coordinador revisó código y capturas estables de escritorio/móvil; comprobó en el servidor del usuario login/recovery 200 y admin anónimo 303. Revisó 25 archivos modificados/nuevos sin encontrar valores de credenciales reales; `.env.local` y capturas siguen ignorados, sin contraseña temporal. El runner aislado y su Auth falso se detuvieron; el servidor del usuario en 3000 permanece disponible. Guía reproducible: `bambu-tech-app/docs/PANEL.md`.
+
+Los servicios de prueba fueron locales y sintéticos: no se crearon cuentas, enviaron correos, cambiaron contraseñas ni modificaron productos remotos en este prompt. Falta el recorrido de esta nueva interfaz con la cuenta real del usuario; las 30 pruebas reales previas de backend no sustituyen ese recorrido. La expiración real/renovación de tokens sigue sin forzarse. El catálogo conserva ejemplos y requiere el prompt 4; la integración final/móvil físico corresponde al prompt 5. El usuario autorizó registrar esta entrega en un commit local; no hay publicación ni push.
+
+Cambios compartidos acotados: `proxy.ts` para las dos entradas públicas y redirección; flag fijo `BAMBU_ADMIN_TEST=1` en Next para aislar compilados de pruebas; Playwright de desarrollo usando Chrome instalado; expectativa de redirección del runner real actualizada sin ejecutarlo. Router, esquema SQL y catálogo no se modificaron. Imports/includes generados por pruebas se restauraron a rutas normales. Los apartados siguientes registran la entrega previa de backend y etapas anteriores.
 
 ## Estado vigente para la entrega — 6 de noviembre de 2026
 

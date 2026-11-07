@@ -98,7 +98,8 @@ async function cleanup() {
 try {
   await request("/api/admin/session", { expected: 401 })
   await request("/api/admin/products", { expected: 401 })
-  await request("/admin", { expected: 401 })
+  const anonymousAdmin = await request("/admin", { expected: 303 })
+  if (new URL(anonymousAdmin.headers.get("location"), base).pathname !== "/admin/login") throw new CheckFailure("anonymous_admin_login_redirect")
   check("anonymous_admin_denied", true)
   const settings = await json("/api/catalog/settings")
   check("approved_whatsapp_persisted", settings.whatsapp_number === "+523343950458")

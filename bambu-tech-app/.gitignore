@@ -18,4 +18,5 @@ __v0_jsx-dev-runtime.ts
 node_modules
 .next/
 *.tsbuildinfo
+.test-artifacts/
 .DS_Store

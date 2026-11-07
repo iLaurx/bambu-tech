@@ -5,6 +5,12 @@ import { failure } from "./lib/backend/http"
 import { BackendError, databaseError } from "./lib/backend/errors"
 
 export async function proxy(request: NextRequest) {
+  // Only these exact pages are public. Their API calls still enforce the server contract.
+  if (["/admin/login", "/admin/recovery"].includes(request.nextUrl.pathname)) {
+    const publicPage = NextResponse.next({ request })
+    publicPage.headers.set("Cache-Control", "private, no-store")
+    return publicPage
+  }
   let response = NextResponse.next({ request })
   try {
     const { url, key } = supabaseConfig()
@@ -28,7 +34,9 @@ export async function proxy(request: NextRequest) {
     response.headers.set("Cache-Control", "private, no-store")
     return response
   } catch (error) {
-    const denied = failure(error)
+    const denied = error instanceof BackendError && error.status === 401
+      ? NextResponse.redirect(new URL("/admin/login", request.url), { status: 303, headers: { "Cache-Control": "private, no-store" } })
+      : failure(error)
     response.cookies.getAll().forEach(cookie => denied.cookies.set(cookie))
     return denied
   }

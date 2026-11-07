@@ -1,6 +1,6 @@
 # Backend local — entrega del prompt 2
 
-Fecha: 6 de noviembre de 2026. Implementación bajo `CONTRATO_BACKEND.md` de la raíz. La entrega inicial fue local; las secciones siguientes registran la configuración y verificación real posteriores expresamente autorizadas. No hay publicación ni despliegue. El catálogo y los componentes del panel conservan el prototipo: conectarlos es trabajo posterior. `/admin` ya está protegido por `proxy.ts`; sin configuración devuelve 503, sin sesión 401 y sin membresía 403, como JSON. La pantalla de acceso/recuperación corresponde al prompt 3.
+Fecha: 6 de noviembre de 2026. Implementación bajo `CONTRATO_BACKEND.md` de la raíz. La entrega inicial fue local; las secciones siguientes registran la configuración y verificación real posteriores expresamente autorizadas. No hay publicación ni despliegue. El catálogo conserva el prototipo; el panel se integra en el prompt 3, descrito en `PANEL.md`. `/admin` está protegido por `proxy.ts`: sin configuración devuelve 503 y sin membresía 403, como JSON; sin sesión redirige con 303 a `/admin/login`. Solo `/admin/login` y `/admin/recovery` son páginas públicas exactas. Las API administrativas siguen devolviendo 401 sin sesión y no cambian su autorización de servidor/RLS.
 
 ### Inspección posterior del entorno real autorizado
 
@@ -194,7 +194,7 @@ Los listados recuperan páginas internas de 200 filas con orden created_at/id; c
 
 El usuario aprobó reducir el máximo a 4 MiB el 6 de noviembre de 2026. La entrada binaria, la salida WebP y el bucket usan 4,194,304 bytes, por debajo de los 4.5 MB de cuerpo de petición y respuesta de [Vercel Functions](https://vercel.com/docs/functions/limitations#request-body-size). La carga es binaria cruda, sin sobrecarga multipart/base64. Esto resuelve la incompatibilidad de tamaño identificada; el alojamiento real aún debe verificarse antes de publicar. No se creó ningún recurso ni se garantiza costo cero.
 
-El componente de fotos del prototipo sigue con su límite anterior de 5 MB y hasta ocho fotos; no fue modificado en esta etapa backend. El prompt 3 debe adoptar `MAX_IMAGE_BYTES`, mostrar 4 MiB y limitar a portada más tres secundarias, además de manejar el rechazo de servidor y subir por la API autorizada.
+El panel del prompt 3 adopta `MAX_IMAGE_BYTES`, muestra 4 MiB y limita a portada más tres secundarias. Maneja rechazos de servidor, conserva cargas pendientes y sube por la API autorizada; ver `PANEL.md`. El catálogo público todavía requiere la integración del prompt 4.
 
 ## Verificación reproducible y evidencia
 

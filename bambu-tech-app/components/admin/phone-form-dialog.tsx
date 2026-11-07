@@ -1,223 +1,83 @@
 "use client"
 
-import { useState, type FormEvent } from "react"
+import { useRef, useState, type FormEvent } from "react"
 import { Button } from "@/components/ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Switch } from "@/components/ui/switch"
-import { PhotosField } from "@/components/admin/photos-field"
-import { BRANDS, type Brand, type Condition, type Product } from "@/lib/products"
-
-const BRAND_OPTIONS = BRANDS.filter((b): b is Brand => b !== "Todos")
-const CONDITIONS: Condition[] = ["Nuevo", "Reacondicionado"]
-const RAM_OPTIONS = [2, 3, 4, 6, 8, 12, 16]
-const STORAGE_OPTIONS = [32, 64, 128, 256, 512, 1024]
+import { CATEGORIES, CONDITIONS, type Category, type ProductInput, type ProductRecord } from "@/lib/backend/contract"
+import { SPEC_FIELDS } from "@/lib/backend/validation"
+import { PhotosField } from "./photos-field"
+import { categorySpecs, formProduct, SPEC_LABELS } from "./product-form-values"
+import { AdminApiError, errorMessage, ProductAlreadySavedError } from "./api"
 
 type Props = {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  product: Product | null
-  onSave: (product: Product) => void
+  open: boolean; onOpenChange: (open: boolean) => void; product: ProductRecord | null
+  onSave: (id: string, input: ProductInput, create: boolean) => Promise<void>
+  onError: (error: unknown) => void
 }
-
-export function PhoneFormDialog({ open, onOpenChange, product, onSave }: Props) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-lg">
-        <DialogHeader>
-          <DialogTitle>{product ? "Editar equipo" : "Agregar nuevo equipo"}</DialogTitle>
-          <DialogDescription>
-            {product ? "Actualiza la información del equipo." : "Completa los datos para publicarlo en el catálogo."}
-          </DialogDescription>
-        </DialogHeader>
-        {open && <PhoneForm key={product?.id ?? "new"} product={product} onSave={onSave} onCancel={() => onOpenChange(false)} />}
-      </DialogContent>
-    </Dialog>
-  )
+const selectClass = "h-9 w-full rounded-lg border border-input bg-background px-2.5 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+export function PhoneFormDialog({ open, onOpenChange, product, onSave, onError }: Props) {
+  const [busy, setBusy] = useState(false)
+  return <Dialog open={open} onOpenChange={next => { if (!busy) onOpenChange(next) }}>
+    <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-xl" showCloseButton={!busy}>
+      <DialogHeader><DialogTitle>{product ? "Editar producto" : "Agregar producto"}</DialogTitle><DialogDescription>Completa los datos del producto. Las especificaciones desconocidas pueden quedar vacías.</DialogDescription></DialogHeader>
+      {open && <ProductForm key={product?.id ?? "new"} product={product} onSave={onSave} onError={onError} onBusyChange={setBusy} onCancel={() => onOpenChange(false)} />}
+    </DialogContent>
+  </Dialog>
 }
-
-function PhoneForm({
-  product,
-  onSave,
-  onCancel,
-}: {
-  product: Product | null
-  onSave: (product: Product) => void
-  onCancel: () => void
-}) {
-  const [brand, setBrand] = useState<Brand>(product?.brand ?? "Apple")
-  const [condition, setCondition] = useState<Condition>(product?.condition ?? "Nuevo")
-  const [ram, setRam] = useState(String(product?.ram ?? 8))
-  const [storage, setStorage] = useState(String(product?.storage ?? 128))
-  const [isSold, setIsSold] = useState(product?.isSold ?? false)
-  const [photos, setPhotos] = useState<string[]>(product?.images ?? [])
-  const [error, setError] = useState<string | null>(null)
-
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+function ProductForm({ product, onSave, onError, onBusyChange, onCancel }: Omit<Props, "open" | "onOpenChange"> & { onBusyChange: (busy: boolean) => void; onCancel: () => void }) {
+  const [id] = useState(() => product?.id ?? crypto.randomUUID())
+  const [creating, setCreating] = useState(!product)
+  const [category, setCategory] = useState<Category>(product?.category ?? "Celulares")
+  const [condition, setCondition] = useState<ProductInput["condition"]>(product?.condition ?? "Nuevo")
+  const [values, setValues] = useState<Record<string, string>>(() => Object.fromEntries(Object.entries(product?.specs ?? {}).map(([key, value]) => [key, String(value)])))
+  const [photos, setPhotos] = useState<string[]>(() => product ? [product.main_image, ...product.gallery_images] : [])
+  const [active, setActive] = useState(product?.is_active ?? false)
+  const [sold, setSold] = useState(product?.is_sold ?? false)
+  const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [error, setError] = useState("")
+  const [needsLogin, setNeedsLogin] = useState(false)
+  const locked = useRef(false)
+  async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    if (locked.current || uploading) return
+    setError("")
     const data = new FormData(event.currentTarget)
-    const model = String(data.get("model") ?? "").trim()
-    const color = String(data.get("color") ?? "").trim().slice(0, 40)
-    const price = Number(data.get("price"))
-
-    if (!model) return setError("Escribe el nombre del modelo.")
-    if (!color) return setError("Escribe el color del equipo.")
-    if (!Number.isInteger(price) || price <= 0) return setError("El precio debe ser un número entero mayor a 0.")
-    if (photos.length === 0) return setError("Agrega al menos una foto del equipo.")
-
-    onSave({
-      id: product?.id ?? crypto.randomUUID(),
-      model,
-      brand,
-      condition,
-      price,
-      ram: Number(ram),
-      storage: Number(storage),
-      images: photos,
-      color,
-      isSold,
-      processor: product?.processor ?? "Por definir",
-      battery: product?.battery ?? 0,
-      unlocked: product?.unlocked ?? true,
-      description: product?.description ?? "",
-    })
+    let input: ProductInput
+    try {
+      input = formProduct(id, { title: String(data.get("title") ?? ""), brand: String(data.get("brand") ?? ""), price: String(data.get("price") ?? ""), description: String(data.get("description") ?? ""), category, condition, specs: values, is_active: active, is_sold: sold }, photos)
+    } catch (failure) { setError(errorMessage(failure)); return }
+    locked.current = true
+    setSaving(true)
+    onBusyChange(true)
+    try { await onSave(id, input, creating) }
+    catch (failure) {
+      if (failure instanceof ProductAlreadySavedError) setCreating(false)
+      setNeedsLogin(failure instanceof AdminApiError && failure.requiresLogin)
+      setError(errorMessage(failure)); onError(failure)
+    }
+    finally { locked.current = false; setSaving(false); onBusyChange(false) }
   }
-
-  return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4" noValidate>
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="model">Título / Modelo</Label>
-        <Input id="model" name="model" defaultValue={product?.model} placeholder="Ej. iPhone 15 Pro" required />
+  const busy = saving || uploading
+  return <form method="post" onSubmit={submit} className="grid gap-4" noValidate>
+    <fieldset disabled={busy} className="grid gap-4">
+      <div className="grid gap-2"><Label htmlFor="title">Título / Modelo</Label><Input id="title" name="title" defaultValue={product?.title} maxLength={200} required placeholder="Ej. iPhone 15 Pro" /></div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-2"><Label htmlFor="category">Categoría</Label><select id="category" value={category} className={selectClass} onChange={event => { const next = event.target.value as Category; setCategory(next); setValues(current => categorySpecs(next, current)) }}>{CATEGORIES.map(item => <option key={item}>{item}</option>)}</select></div>
+        <div className="grid gap-2"><Label htmlFor="brand">Marca</Label><Input id="brand" name="brand" defaultValue={product?.brand} maxLength={80} required placeholder="Marca del producto" /></div>
+        <div className="grid gap-2"><Label htmlFor="price">Precio (MXN)</Label><Input id="price" name="price" inputMode="decimal" defaultValue={product?.price} required placeholder="11499.00" /></div>
+        <div className="grid gap-2"><Label htmlFor="condition">Condición</Label><select id="condition" value={condition} className={selectClass} onChange={event => setCondition(event.target.value as ProductInput["condition"])}>{CONDITIONS.map(item => <option key={item}>{item}</option>)}</select></div>
       </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="brand">Marca</Label>
-          <Select value={brand} onValueChange={(v) => v && setBrand(v as Brand)}>
-            <SelectTrigger id="brand" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {BRAND_OPTIONS.map((b) => (
-                <SelectItem key={b} value={b}>
-                  {b}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="price">Precio (MXN)</Label>
-          <Input
-            id="price"
-            name="price"
-            type="number"
-            inputMode="numeric"
-            min={1}
-            step={1}
-            defaultValue={product?.price}
-            placeholder="11499"
-            required
-          />
-        </div>
-        <div className="flex flex-col gap-2 sm:col-span-2">
-          <Label htmlFor="color">Color</Label>
-          <Input
-            id="color"
-            name="color"
-            defaultValue={product?.color}
-            placeholder="Ej. Titanio natural"
-            maxLength={40}
-            required
-          />
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="ram">Memoria RAM</Label>
-          <Select value={ram} onValueChange={(v) => v && setRam(v)}>
-            <SelectTrigger id="ram" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {RAM_OPTIONS.map((r) => (
-                <SelectItem key={r} value={String(r)}>
-                  {r} GB
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex flex-col gap-2">
-          <Label htmlFor="storage">Almacenamiento</Label>
-          <Select value={storage} onValueChange={(v) => v && setStorage(v)}>
-            <SelectTrigger id="storage" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STORAGE_OPTIONS.map((s) => (
-                <SelectItem key={s} value={String(s)}>
-                  {s >= 1024 ? "1 TB" : `${s} GB`}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-
-      <fieldset className="flex flex-col gap-2">
-        <legend className="mb-2 text-sm font-medium text-foreground">Condición</legend>
-        <div className="grid grid-cols-2 gap-2">
-          {CONDITIONS.map((c) => (
-            <label
-              key={c}
-              className="flex cursor-pointer items-center justify-center rounded-md border border-input px-3 py-2 text-sm font-medium text-foreground transition-colors has-[:checked]:border-primary has-[:checked]:bg-primary/10 has-[:checked]:text-primary has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-ring"
-            >
-              <input
-                type="radio"
-                name="condition"
-                value={c}
-                checked={condition === c}
-                onChange={() => setCondition(c)}
-                className="sr-only"
-              />
-              {c}
-            </label>
-          ))}
-        </div>
-      </fieldset>
-
-      <PhotosField photos={photos} onChange={setPhotos} />
-
-      <div className="flex items-center justify-between rounded-lg border border-border bg-muted/40 px-4 py-3">
-        <div>
-          <Label htmlFor="is-available">Disponible para venta</Label>
-          <p className="text-xs text-muted-foreground">
-            {isSold ? "Marcado como vendido: no aparece en la tienda." : "Visible en el catálogo público."}
-          </p>
-        </div>
-        <Switch id="is-available" checked={!isSold} onCheckedChange={(checked) => setIsSold(!checked)} />
-      </div>
-
-      {error && (
-        <p role="alert" className="text-sm font-medium text-destructive">
-          {error}
-        </p>
-      )}
-
-      <DialogFooter className="gap-2">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancelar
-        </Button>
-        <Button type="submit">{product ? "Guardar cambios" : "Agregar equipo"}</Button>
-      </DialogFooter>
-    </form>
-  )
+      <div className="grid gap-2"><Label htmlFor="description">Descripción</Label><textarea id="description" name="description" defaultValue={product?.description} maxLength={10000} rows={3} className={`${selectClass} h-auto py-2`} /></div>
+      <fieldset className="rounded-lg border p-3"><legend className="px-1 text-sm font-medium">Especificaciones de {category}</legend><div className="grid gap-4 sm:grid-cols-2">{Object.entries(SPEC_FIELDS[category]).map(([key, kind]) => <div key={key} className="grid gap-2"><Label htmlFor={`spec-${key}`}>{SPEC_LABELS[key]}</Label>{kind === "boolean" ? <select id={`spec-${key}`} value={values[key] ?? ""} className={selectClass} onChange={event => setValues(current => ({ ...current, [key]: event.target.value }))}><option value="">Sin especificar</option><option value="true">Sí</option><option value="false">No</option></select> : <Input id={`spec-${key}`} value={values[key] ?? ""} inputMode={kind === "positive" ? "decimal" : "text"} maxLength={key === "features" ? 1000 : 200} onChange={event => setValues(current => ({ ...current, [key]: event.target.value }))} placeholder="Opcional" />}</div>)}</div></fieldset>
+      <div className="grid gap-3 rounded-lg border bg-muted/30 p-3"><label className="flex items-center justify-between gap-3"><span className="text-sm">Visible en el catálogo</span><Switch aria-label="Visible en el catálogo" checked={active} onCheckedChange={setActive} /></label><label className="flex items-center justify-between gap-3"><span className="text-sm">Producto agotado</span><Switch aria-label="Producto agotado" checked={sold} onCheckedChange={setSold} /></label><p className="text-xs text-muted-foreground">Un producto visible y agotado permanece en el catálogo con su distintivo.</p></div>
+    </fieldset>
+    <PhotosField productId={id} photos={photos} onChange={setPhotos} disabled={saving} onBusyChange={next => { setUploading(next); onBusyChange(next) }} onError={onError} />
+    {error && <p role="alert" className="text-sm text-destructive">{error}</p>}
+    {needsLogin && <a href="/admin/login" target="_blank" rel="noopener noreferrer" className="text-sm text-primary underline">Iniciar sesión en otra pestaña y volver a intentar sin perder los datos</a>}
+    <DialogFooter><Button type="button" variant="outline" disabled={busy} onClick={onCancel}>Cancelar</Button><Button type="submit" disabled={busy}>{saving ? "Guardando…" : uploading ? "Cargando fotos…" : product ? "Guardar cambios" : "Crear producto"}</Button></DialogFooter>
+  </form>
 }

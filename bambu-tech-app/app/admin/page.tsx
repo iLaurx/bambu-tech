@@ -1,6 +1,5 @@
 import type { Metadata } from "next"
 import { AdminDashboard } from "@/components/admin/admin-dashboard"
-import { PRODUCTS } from "@/lib/products"
 
 export const metadata: Metadata = {
   title: "Panel de administración | Bambu Tech",
@@ -8,6 +7,7 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-export default function AdminPage() {
-  return <AdminDashboard initialProducts={PRODUCTS} />
+export default async function AdminPage({ searchParams }: { searchParams: Promise<{ recovery?: string }> }) {
+  const parameters = await searchParams
+  return <AdminDashboard recovery={parameters.recovery === "1"} />
 }

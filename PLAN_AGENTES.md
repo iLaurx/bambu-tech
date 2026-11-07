@@ -4,7 +4,7 @@
 
 El usuario solicitó comenzar por el prompt 2, aprobó el contrato, autorizó un agente backend y posteriormente la configuración y pruebas de su proyecto Supabase. Administrador y WhatsApp ya están configurados; hubo un permiso específico para probar recuperación por correo. Acuerdos en `CONTRATO_BACKEND.md`. No hay autorización de publicación. El coordinador revisa y mantiene documentación, sin implementar código.
 
-Los prompts 3 y 4 todavía no se delegan: deben consumir el contrato entregado por backend y coordinar archivos compartidos. Ninguna interfaz queda integrada por la mera existencia de las nuevas rutas. El prompt 5 requiere además un entorno real de pruebas autorizado para comprobar persistencia, Auth y Storage.
+El usuario autorizó el prompt 3 y su entrega está implementada y revisada: acceso/recuperación, inventario persistente, métricas, WhatsApp, estados y fotos. Guía `bambu-tech-app/docs/PANEL.md`; 17 pruebas locales, 13 grupos de navegador simulado, tipos y Webpack aprobados. La prueba visual y el acceso anónimo del servidor existente también se revisaron. Falta recorrer la nueva interfaz con la cuenta real del usuario. No hubo nuevos correos, cambios de contraseña real ni mutaciones remotas. El catálogo y esquema siguen intactos; el prompt 4 todavía no se delega y el prompt 5 requiere los recorridos completos.
 
 El prompt 2 tiene entrega backend revisada en `bambu-tech-app/docs/BACKEND.md`, incluyendo pruebas con Supabase real. Resultados y límites en `ESTADO_ACTUAL.md`. El usuario aprobó imágenes de 4 MiB; el panel futuro debe consumir ese máximo compartido y sustituir su validación original. No iniciar otros agentes sin autorización del usuario para esa siguiente tarea.
 
