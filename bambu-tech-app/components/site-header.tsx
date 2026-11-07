@@ -1,4 +1,4 @@
-import { Search, Smartphone } from "lucide-react"
+import { Search } from "lucide-react"
 import { Input } from "@/components/ui/input"
 
 type SiteHeaderProps = {
@@ -11,10 +11,7 @@ export function SiteHeader({ query, onQueryChange }: SiteHeaderProps) {
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6 sm:px-6 lg:px-8">
         <a href="/" className="flex items-center gap-2.5" aria-label="Bambu Tech, inicio">
-          <span className="flex size-9 items-center justify-center rounded-xl bg-primary text-primary-foreground">
-            <Smartphone className="size-5" aria-hidden="true" />
-          </span>
-          <span className="text-lg font-semibold tracking-tight">Bambu Tech</span>
+          <img src="/bambu-wordmark.webp" width={480} height={114} alt="" className="h-auto w-36 sm:w-40" />
         </a>
 
         <div role="search" className="relative w-full sm:max-w-md">

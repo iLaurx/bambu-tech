@@ -12,9 +12,9 @@ try {
  const serverContext = await browser.newContext({ javaScriptEnabled: false })
  const serverPage = await serverContext.newPage()
  await serverPage.goto(base)
- assert.equal(await serverPage.getByRole("button", { name: "Actualizando…", exact: true }).isDisabled(), true)
- assert.equal(await serverPage.getByRole("button", { name: "Actualizando…", exact: true }).getAttribute("autocomplete"), "off")
- console.log(JSON.stringify({ serverInitialLoading: true, serverInitialDisabled: true, restorationOptOutAttribute: "off" }))
+ await serverPage.getByText("Cargando catálogo…", { exact: true }).waitFor()
+ assert.equal(await serverPage.getByRole("button", { name: "Actualizar catálogo", exact: true }).count(), 0)
+ console.log(JSON.stringify({ serverInitialLoading: true, refreshButtonAbsent: true }))
  await serverContext.close()
  const context = await browser.newContext({ serviceWorkers: "block" })
  await context.route("**/api/**", route => {
@@ -28,8 +28,9 @@ try {
  })
  for (let attempt = 0; attempt < 3; attempt++) {
   if (!attempt) await page.goto(base); else await page.reload()
-  await page.getByRole("button", { name: "Actualizar catálogo", exact: true }).waitFor()
-  assert.equal(await page.getByRole("button", { name: "Actualizar catálogo", exact: true }).isDisabled(), false)
+  await page.getByRole("heading", { name: "Tecnología nueva y reacondicionada" }).waitFor()
+  await page.getByText("Cargando catálogo…", { exact: true }).waitFor({ state: "hidden" })
+  assert.equal(await page.getByRole("button", { name: "Actualizar catálogo", exact: true }).count(), 0)
  }
  console.log(JSON.stringify({ cleanReloads: 3, hydrationWarnings: hydrationMessages.length, pageErrors: pageErrors.length, blockedWrites }))
  assert.equal(hydrationMessages.length, 0, "no hydration warnings on clean browser")

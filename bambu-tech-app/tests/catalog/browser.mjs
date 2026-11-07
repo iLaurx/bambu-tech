@@ -162,7 +162,7 @@ try {
  await dialog.waitFor({ state: "hidden" })
  pass("mobile catalogue/detail fit viewport with eighty-character brand")
  state.rows = []
- await page.getByRole("button", { name: "Actualizar catálogo", exact: true }).click()
+ await page.evaluate(() => window.dispatchEvent(new Event("focus")))
  await page.getByText("Todavía no hay productos publicados", { exact: true }).waitFor()
  assert.deepEqual(errors, [])
  assert.deepEqual(hydrationErrors, [], "no React hydration warnings or errors")
