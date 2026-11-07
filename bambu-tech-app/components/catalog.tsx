@@ -1,15 +1,12 @@
 "use client"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { RefreshCw, SearchX } from "lucide-react"
+import { SearchX } from "lucide-react"
 import { SiteHeader } from "./site-header"
 import { CatalogFilters } from "./catalog-filters"
 import { ProductCard } from "./product-card"
 import { ProductDetailDialog } from "./product-detail-dialog"
 import type { ProductRecord, PublicSettings } from "@/lib/backend/contract"
 import { activeProducts, catalogBrands, CatalogError, catalogRequest, filteredProducts, type CatalogCategory, type PriceRange } from "./catalog-data"
-// Firefox can restore a button's old disabled state before hydration. Its supported
-// autocomplete opt-out is spread because React's button typings omit this Firefox attribute.
-const refreshButtonRestoration = { autoComplete: "off" } as const
 export function Catalog({ demo = false }: { demo?: boolean }) {
   const [products, setProducts] = useState<ProductRecord[]>([])
   const [settings, setSettings] = useState<PublicSettings | null>(null)
@@ -92,9 +89,9 @@ export function Catalog({ demo = false }: { demo?: boolean }) {
   const brands = useMemo(() => catalogBrands(products), [products])
   const visible = useMemo(() => filteredProducts(products, query, category, brand, priceRange), [products, query, category, brand, priceRange])
   const reset = () => { setQuery(""); setCategory("Todos"); setBrand(""); setPriceRange("all") }
-  return <><SiteHeader query={query} onQueryChange={setQuery} /><main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  return <><div className="bamboo-leaves" aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /><i /><i /></div><SiteHeader query={query} onQueryChange={setQuery} /><main className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
     {demo && <p role="status" className="mb-6 rounded-xl border p-4 text-sm font-medium">Demostración: productos y precios de ejemplo. No representan inventario real.</p>}
-    <div className="mb-6 flex flex-wrap items-start justify-between gap-4"><div className="grid gap-1"><h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">Tecnología nueva y reacondicionada</h1><p className="text-muted-foreground">Explora celulares, bocinas, relojes y más.</p></div><button {...refreshButtonRestoration} type="button" disabled={loading} onClick={() => { void loadProducts(); void loadSettings() }} className="inline-flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-sm disabled:opacity-50"><RefreshCw className="size-4" />{loading ? "Actualizando…" : "Actualizar catálogo"}</button></div>
+    <div className="mb-6 grid gap-1"><h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">Tecnología nueva y reacondicionada</h1><p className="text-muted-foreground">Explora celulares, bocinas, relojes y más.</p></div>
     <CatalogFilters category={category} onCategoryChange={setCategory} brands={brands} brand={brand} onBrandChange={setBrand} priceRange={priceRange} onPriceRangeChange={setPriceRange} />
     {settingsError && <div className="mt-5 rounded-xl border p-3 text-sm"><p>El contacto por WhatsApp no está disponible por el momento.</p><button type="button" onClick={() => void loadSettings()} className="mt-1 text-primary underline">Reintentar contacto</button></div>}
     {error ? <div role="alert" className="mt-6 rounded-xl border p-6"><p>{error}</p><button type="button" onClick={() => void loadProducts()} className="mt-2 text-primary underline">Reintentar catálogo</button></div> : loading && !products.length ? <p role="status" className="py-16 text-center text-muted-foreground">Cargando catálogo…</p> : <><p className="mb-4 mt-6 text-sm text-muted-foreground" aria-live="polite">{visible.length} {visible.length === 1 ? "producto" : "productos"}</p>{visible.length ? <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">{visible.map((product, index) => <li key={product.id} className="min-w-0"><ProductCard product={product} onSelect={openProduct} priority={index < 4} /></li>)}</ul> : <div className="flex flex-col items-center gap-3 rounded-2xl border border-dashed py-16 text-center"><SearchX className="size-8 text-muted-foreground" /><p className="font-medium">{products.length ? "No encontramos productos con esos filtros" : "Todavía no hay productos publicados"}</p>{products.length > 0 && <button type="button" onClick={reset} className="text-sm text-primary underline">Limpiar filtros</button>}</div>}</>}
