@@ -164,6 +164,46 @@
   75% { transform: translate3d(18px, 81vh, 0) rotate(100deg); }
   100% { transform: translate3d(-4px, 115vh, 0) rotate(155deg); }
 }
+/* Light, non-interactive bamboo silhouettes decorate the lower right corner. */
+.bamboo-growth { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.bamboo-growth i {
+  position: absolute;
+  bottom: 0;
+  width: 8px;
+  height: 165px;
+  opacity: .10;
+  border-radius: 5px 5px 0 0;
+  background: repeating-linear-gradient(to top, #387b47 0 34px, #e4eddd 34px 38px);
+  transform-origin: bottom;
+  animation: bamboo-grow 24s ease-in-out infinite alternate;
+}
+.bamboo-growth i::before, .bamboo-growth i::after {
+  content: "";
+  position: absolute;
+  width: 35px;
+  height: 11px;
+  background: #387b47;
+  border-radius: 100% 0 100% 0;
+}
+.bamboo-growth i::before { left: 4px; top: 31%; transform: rotate(-32deg); transform-origin: left; }
+.bamboo-growth i::after { right: 4px; top: 58%; transform: rotate(-32deg); transform-origin: right; }
+.bamboo-growth i:nth-child(1) { right: 1%; height: 145px; animation-delay: -13s; }
+.bamboo-growth i:nth-child(2) { right: 4%; height: 90px; animation-delay: -3s; }
+@keyframes bamboo-grow { from { transform: scaleY(.58); } to { transform: scaleY(1); } }
+
+.catalog-card { transition: transform .2s ease, box-shadow .2s ease; }
+.catalog-card:focus-within { box-shadow: 0 5px 18px rgb(49 113 70 / 16%); }
+.catalog-card:active { transform: translateY(-2px); box-shadow: 0 5px 18px rgb(49 113 70 / 16%); }
+.category-choice[aria-pressed="true"] { box-shadow: 0 3px 10px rgb(49 113 70 / 19%); }
+@media (hover: hover) {
+  .catalog-card:hover { transform: translateY(-3px); box-shadow: 0 7px 20px rgb(49 113 70 / 16%); }
+}
+@media (max-width: 639px) { .bamboo-growth i:nth-child(even) { display: none; } }
 @media (prefers-reduced-motion: reduce) {
   .bamboo-leaves { display: none; }
+  .bamboo-growth i { animation: none; }
+  .catalog-card { transition: none; }
+  .catalog-card:hover, .catalog-card:active { transform: none; }
+  .catalog-card img { transition: none; }
+  .catalog-card:hover img { transform: none; }
 }

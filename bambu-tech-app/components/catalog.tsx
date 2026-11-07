@@ -89,7 +89,7 @@ export function Catalog({ demo = false }: { demo?: boolean }) {
   const brands = useMemo(() => catalogBrands(products), [products])
   const visible = useMemo(() => filteredProducts(products, query, category, brand, priceRange), [products, query, category, brand, priceRange])
   const reset = () => { setQuery(""); setCategory("Todos"); setBrand(""); setPriceRange("all") }
-  return <><div className="bamboo-leaves" aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /><i /><i /></div><SiteHeader query={query} onQueryChange={setQuery} /><main className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+  return <><div className="bamboo-leaves" aria-hidden="true"><i /><i /><i /><i /><i /><i /><i /><i /><i /></div><div className="bamboo-growth" aria-hidden="true"><i /><i /></div><SiteHeader query={query} onQueryChange={setQuery} /><main className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
     {demo && <p role="status" className="mb-6 rounded-xl border p-4 text-sm font-medium">Demostración: productos y precios de ejemplo. No representan inventario real.</p>}
     <div className="mb-6 grid gap-1"><h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">Tecnología nueva y reacondicionada</h1><p className="text-muted-foreground">Explora celulares, bocinas, relojes y más.</p></div>
     <CatalogFilters category={category} onCategoryChange={setCategory} brands={brands} brand={brand} onBrandChange={setBrand} priceRange={priceRange} onPriceRangeChange={setPriceRange} />
