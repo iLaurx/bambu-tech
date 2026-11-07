@@ -4,7 +4,7 @@ Revisión estática del código disponible el 6 de noviembre de 2026. No se arra
 
 ## Ubicación y stack
 
-Raíz de la app: `drive-download-20261102T005900Z-1-001/bambu-tech-e-commerce-app_latest/`. El directorio superior también contiene el ZIP original y un DOCX de requisitos. El paquete incluye `node_modules`, `.next` y lockfile; su presencia no demuestra que la app compile o funcione. No se ha confirmado un repositorio Git operativo.
+Raíz de la app: `bambu-tech-app/`. El directorio superior también contiene el ZIP original y un DOCX de requisitos. El paquete incluye `node_modules`, `.next` y lockfile; su presencia no demuestra que la app compile o funcione. No se ha confirmado un repositorio Git operativo.
 
 `package.json` declara Next.js 16.3.3, React 19, TypeScript 5.7.3, Tailwind CSS 4, Base UI/shadcn, Lucide y Vercel Analytics; declara pnpm 12.3.4. App Router usa `app/page.tsx`, `app/admin/page.tsx` y `app/layout.tsx`. No aparecen dependencias de Supabase ni scripts de pruebas/lint. `next.config.mjs` desactiva optimización de imágenes y tiene `typescript.ignoreBuildErrors: true`. `layout.tsx` incluye fuente Geist y Analytics solo en producción.
 

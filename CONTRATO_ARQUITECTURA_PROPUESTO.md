@@ -203,7 +203,7 @@ Eliminar defaults falsos del formulario: RAM/ROM predeterminadas, batería cero,
 
 ## 10. Responsables de archivos e integración
 
-Rutas relativas a `drive-download-20261102T005900Z-1-001/bambu-tech-e-commerce-app_latest/`. Son límites de trabajo futuro; no se han lanzado agentes de implementación.
+Rutas relativas a `bambu-tech-app/`. Son límites de trabajo futuro; no se han lanzado agentes de implementación.
 
 | Responsable | Archivos exclusivos propuestos | Entrega requerida |
 | --- | --- | --- |

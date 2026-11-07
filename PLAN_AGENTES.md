@@ -2,7 +2,7 @@
 
 ## Cómo usar este plan
 
-La aplicación está en `drive-download-20261102T005900Z-1-001/bambu-tech-e-commerce-app_latest/`. Cada agente debe leer `AGENTS.md`, `MVP.md` y `ESTADO_ACTUAL.md` en la raíz de este espacio. Estos prompts son propuestas para que el usuario los asigne: no implican que los agentes ya hayan trabajado ni autorizan crear recursos externos. Antes de implementar, resolver las decisiones de `MVP.md` que afecten el contrato. Si faltan credenciales, preparar y probar lo posible localmente y reportar con precisión los bloqueos.
+La aplicación está en `bambu-tech-app/`. Cada agente debe leer `AGENTS.md`, `MVP.md` y `ESTADO_ACTUAL.md` en la raíz de este espacio. Estos prompts son propuestas para que el usuario los asigne: no implican que los agentes ya hayan trabajado ni autorizan crear recursos externos. Antes de implementar, resolver las decisiones de `MVP.md` que afecten el contrato. Si faltan credenciales, preparar y probar lo posible localmente y reportar con precisión los bloqueos.
 
 ## Dependencias y coordinación
 
