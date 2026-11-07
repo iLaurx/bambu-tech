@@ -110,8 +110,17 @@ try {
   assert.equal(await noJsPage.locator("form").getAttribute("action"), "/api/auth/login")
   assert.equal(await noJsPage.getByLabel("Contraseña", { exact: true }).isDisabled(), true)
   assert.equal(await noJsPage.getByRole("button", { name: "Entrar al panel" }).isDisabled(), true)
+  await noJs.addCookies([{ name: cookieName, value: sessionCookie, url: base, httpOnly: true, sameSite: "Lax" }])
+  await noJsPage.goto(`${base}/admin`)
+  const serverRefresh = noJsPage.getByRole("button", { name: "Actualizando…", exact: true })
+  assert.equal(await serverRefresh.isDisabled(), true)
+  assert.equal(await serverRefresh.getAttribute("autocomplete"), "off")
+  await noJsPage.reload()
+  assert.equal(await serverRefresh.isDisabled(), true)
+  assert.equal(await serverRefresh.getAttribute("autocomplete"), "off")
   await noJs.close()
   pass("pre-hydration: password form uses POST and cannot submit before JavaScript is ready")
+  pass("panel SSR: refresh remains initially disabled and opts out of restored state without JavaScript")
   const context = await browser.newContext({ viewport: { width: 1366, height: 900 }, serviceWorkers: "block" })
   const credentialQueryPaths = []
   context.on("request", request => {
@@ -121,7 +130,11 @@ try {
   await context.route("**/api/**", intercepted)
   const page = await context.newPage()
   const pageErrors = []
+  const hydrationMessages = []
   page.on("pageerror", error => pageErrors.push(error.message))
+  page.on("console", message => {
+    if (["error", "warning"].includes(message.type()) && /hydrat|didn.t match|server rendered html|server-rendered html/i.test(message.text())) hydrationMessages.push(message.text())
+  })
   await page.goto(`${base}/admin/login`)
   await page.getByLabel("Correo electrónico").waitFor({ state: "visible" })
   await page.waitForFunction(() => !document.getElementById("email").disabled)
@@ -133,6 +146,15 @@ try {
   await page.getByText("No hay productos en el inventario", { exact: true }).waitFor()
   assert.equal(store.loginCalls, 1)
   pass("login: duplicate action prevented and empty persistent inventory")
+  for (let reload = 0; reload < 3; reload++) {
+    await page.reload()
+    await page.getByText("No hay productos en el inventario", { exact: true }).waitFor()
+    const refresh = page.getByRole("button", { name: "Actualizar", exact: true })
+    assert.equal(await refresh.isDisabled(), false)
+    assert.equal(await refresh.getAttribute("autocomplete"), "off")
+  }
+  assert.equal(hydrationMessages.length, 0)
+  pass("panel hydration: three clean Chrome reloads without hydration warnings")
 
   await page.getByRole("button", { name: "Agregar producto" }).click()
   const dialog = page.getByRole("dialog")
@@ -274,6 +296,7 @@ try {
   assert.equal(response.status(), 403)
   adminRole = true
   assert.deepEqual(pageErrors, [])
+  assert.deepEqual(hydrationMessages, [])
   assert.deepEqual(credentialQueryPaths, [])
   pass("proxy: authenticated non-admin denied; no browser runtime errors")
   console.log(JSON.stringify({ browserChecks: assertions, realSupabaseRequests: 0, realEmailsSent: 0, realPasswordsChanged: 0 }))

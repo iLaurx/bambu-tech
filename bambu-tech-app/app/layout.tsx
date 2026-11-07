@@ -6,9 +6,9 @@ import './globals.css'
 const geistSans = Geist({ subsets: ['latin'], variable: '--font-geist-sans' })
 
 export const metadata: Metadata = {
-  title: 'Bambu Tech | Celulares nuevos y reacondicionados en México',
+  title: 'Bambu Tech | Tecnología nueva y reacondicionada en México',
   description:
-    'Catálogo de celulares nuevos y reacondicionados: iPhone, Samsung Galaxy, Xiaomi y Motorola con precios en pesos mexicanos. Contáctanos por WhatsApp.',
+    'Explora celulares, bocinas, smartbands, smartwatches y otros electrónicos con precios en pesos mexicanos. Consulta disponibilidad por WhatsApp.',
   generator: 'v0.app',
   icons: {
     icon: [

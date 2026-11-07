@@ -19,7 +19,7 @@ export function SiteHeader({ query, onQueryChange }: SiteHeaderProps) {
 
         <div role="search" className="relative w-full sm:max-w-md">
           <label htmlFor="search-phones" className="sr-only">
-            Buscar modelo de celular
+            Buscar producto o marca
           </label>
           <Search
             className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground"
@@ -30,7 +30,7 @@ export function SiteHeader({ query, onQueryChange }: SiteHeaderProps) {
             type="search"
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
-            placeholder="Buscar modelo, p. ej. iPhone 15"
+            placeholder="Buscar producto o marca"
             className="h-10 rounded-full bg-muted/60 pl-9"
             autoComplete="off"
           />

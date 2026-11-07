@@ -1,53 +1,11 @@
-import Image from "next/image"
 import { ArrowRight } from "lucide-react"
 import { ConditionBadge } from "@/components/condition-badge"
-import { formatPrice, type Product } from "@/lib/products"
-
-type ProductCardProps = {
-  product: Product
-  onSelect: (product: Product) => void
-  priority?: boolean
-}
-
-export function ProductCard({ product, onSelect, priority }: ProductCardProps) {
-  return (
-    <article className="group relative flex flex-col overflow-hidden rounded-2xl border bg-card transition-shadow hover:shadow-lg">
-      <div className="relative aspect-square bg-muted">
-        <Image
-          src={product.images[0] || "/placeholder.svg"}
-          alt={product.model}
-          fill
-          priority={priority}
-          sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
-          className="object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-        <ConditionBadge condition={product.condition} className="absolute top-3 left-3" />
-      </div>
-
-      <div className="flex flex-1 flex-col gap-1 p-4">
-        <h3 className="font-semibold text-balance">
-          <button
-            type="button"
-            onClick={() => onSelect(product)}
-            className="text-left outline-none after:absolute after:inset-0 after:rounded-2xl focus-visible:after:ring-3 focus-visible:after:ring-ring/50"
-          >
-            {product.model}
-          </button>
-        </h3>
-        <p className="text-sm text-muted-foreground">
-          {product.ram}GB RAM / {product.storage}GB ROM
-        </p>
-        <div className="mt-3 flex items-end justify-between gap-2">
-          <p className="text-xl font-bold tracking-tight">{formatPrice(product.price)}</p>
-          <span
-            className="inline-flex items-center gap-1 text-sm font-medium text-primary"
-            aria-hidden="true"
-          >
-            Ver detalles
-            <ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" />
-          </span>
-        </div>
-      </div>
-    </article>
-  )
+import { formatMxn, imageUrl, type ProductRecord } from "@/lib/backend/contract"
+import { productSpecs } from "./catalog-data"
+export function ProductCard({ product, onSelect, priority }: { product: ProductRecord; onSelect: (product: ProductRecord) => void; priority?: boolean }) {
+  const summary = productSpecs(product).slice(0, 2).map(spec => `${spec.label}: ${spec.value}`).join(" · ")
+  return <article className="group relative flex min-w-0 h-full flex-col overflow-hidden rounded-2xl border bg-card transition-shadow hover:shadow-lg">
+    <div className="relative aspect-square bg-muted"><img src={imageUrl(product.main_image)} alt={product.title} loading={priority ? "eager" : "lazy"} className="size-full object-contain transition-transform duration-300 group-hover:scale-105" /><ConditionBadge condition={product.condition} className="absolute left-3 top-3" />{product.is_sold && <span className="absolute bottom-3 right-3 rounded-full bg-background/95 px-3 py-1 text-sm font-semibold">Agotado</span>}</div>
+    <div className="flex min-w-0 flex-1 flex-col gap-1 p-4"><p className="break-words text-xs text-muted-foreground">{product.category} · {product.brand}</p><h2 className="break-words font-semibold"><button type="button" onClick={() => onSelect(product)} className="text-left outline-none after:absolute after:inset-0 after:rounded-2xl focus-visible:after:ring-2 focus-visible:after:ring-ring">{product.title}</button></h2>{summary && <p className="break-words text-sm text-muted-foreground">{summary}</p>}<div className="mt-auto flex flex-wrap items-end justify-between gap-2 pt-4"><p className="text-xl font-bold tracking-tight">{formatMxn(product.price)} MXN</p><span aria-hidden="true" className="inline-flex items-center gap-1 text-sm font-medium text-primary">Ver detalles<ArrowRight className="size-4" /></span></div></div>
+  </article>
 }

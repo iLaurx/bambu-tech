@@ -1,70 +1,11 @@
 "use client"
-
-import { SlidersHorizontal } from "lucide-react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { BRANDS, PRICE_RANGES, type Brand, type PriceRangeValue } from "@/lib/products"
+import { CATEGORIES } from "@/lib/backend/contract"
 import { cn } from "@/lib/utils"
-
-type CatalogFiltersProps = {
-  brand: "Todos" | Brand
-  onBrandChange: (brand: "Todos" | Brand) => void
-  priceRange: PriceRangeValue
-  onPriceRangeChange: (value: PriceRangeValue) => void
-}
-
-const priceItems = PRICE_RANGES.map(({ value, label }) => ({ value, label }))
-
-export function CatalogFilters({ brand, onBrandChange, priceRange, onPriceRangeChange }: CatalogFiltersProps) {
-  return (
-    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div
-        role="group"
-        aria-label="Filtrar por marca"
-        className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0 sm:pb-0"
-      >
-        {BRANDS.map((b) => {
-          const active = b === brand
-          return (
-            <button
-              key={b}
-              type="button"
-              aria-pressed={active}
-              onClick={() => onBrandChange(b)}
-              className={cn(
-                "shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors outline-none focus-visible:ring-3 focus-visible:ring-ring/50",
-                active
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "bg-card text-foreground hover:bg-muted",
-              )}
-            >
-              {b}
-            </button>
-          )
-        })}
-      </div>
-
-      <div className="flex items-center gap-2">
-        <SlidersHorizontal className="size-4 text-muted-foreground" aria-hidden="true" />
-        <span id="price-label" className="sr-only">
-          Rango de precio
-        </span>
-        <Select
-          items={priceItems}
-          value={priceRange}
-          onValueChange={(value) => value && onPriceRangeChange(value as PriceRangeValue)}
-        >
-          <SelectTrigger aria-labelledby="price-label" className="h-9 min-w-48 rounded-full bg-card px-4">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {priceItems.map((item) => (
-              <SelectItem key={item.value} value={item.value}>
-                {item.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-    </div>
-  )
+import { PRICE_OPTIONS, type CatalogCategory, type PriceRange } from "./catalog-data"
+type Props = { category: CatalogCategory; onCategoryChange: (value: CatalogCategory) => void; brands: string[]; brand: string; onBrandChange: (value: string) => void; priceRange: PriceRange; onPriceRangeChange: (value: PriceRange) => void }
+export function CatalogFilters({ category, onCategoryChange, brands, brand, onBrandChange, priceRange, onPriceRangeChange }: Props) {
+  return <div className="grid gap-4">
+    <div role="group" aria-label="Filtrar por categoría" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">{(["Todos", ...CATEGORIES] as CatalogCategory[]).map(item => <button key={item} type="button" aria-pressed={category === item} onClick={() => onCategoryChange(item)} className={cn("shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring", category === item ? "border-primary bg-primary text-primary-foreground" : "bg-card hover:bg-muted")}>{item}</button>)}</div>
+    <div className="flex flex-wrap gap-3"><div className="grid min-w-0 max-w-full gap-1 text-sm"><label htmlFor="catalog-brand">Marca</label><select id="catalog-brand" className="h-10 min-w-0 max-w-full rounded-full border bg-card px-4" value={brand} onChange={event => onBrandChange(event.target.value)}><option value="">Todas las marcas</option>{brands.map(item => <option key={item} value={item}>{item}</option>)}</select></div><div className="grid min-w-0 max-w-full gap-1 text-sm"><label htmlFor="catalog-price">Rango de precio</label><select id="catalog-price" className="h-10 min-w-0 max-w-full rounded-full border bg-card px-4" value={priceRange} onChange={event => onPriceRangeChange(event.target.value as PriceRange)}>{PRICE_OPTIONS.map((label, index) => <option key={label} value={index === 0 ? "all" : String(index - 1)}>{label}</option>)}</select></div></div>
+  </div>
 }

@@ -76,3 +76,11 @@ Resultados al cierre:
 - El coordinador verificó anónimamente en el servidor real existente: login/recovery 200 y admin 303 a login. No equivale a un recorrido administrativo real.
 
 Las pruebas del panel usan respuestas simuladas: no prueban una cuenta real no administradora, expiración real del proveedor, entrega de nuevos correos, cambio de contraseña real ni fallos parciales reales de Storage. Las 30 pruebas de backend con Supabase real y la recuperación real previa están documentadas en `BACKEND.md`, pero no reemplazan el recorrido manual de esta nueva interfaz. Sigue pendiente probar login del usuario y CRUD desde el panel con datos de prueba autorizados, además de integración de catálogo y revisión final del MVP. No se publicó ni desplegó nada.
+
+## Ajuste puntual de hidratación — 7 de noviembre de 2026
+
+El aviso del usuario tras F5 en Firefox señaló el botón «Actualizar» del dashboard: React esperaba `disabled=true` y el DOM tenía el atributo ausente. El código inicia `loading=true` tanto en SSR como en el primer render del navegador; no se encontró un estado inicial dependiente de ventana, fecha o datos externos. Firefox documenta la restauración del estado dinámico `disabled` entre cargas, por lo que esa es una causa probable, no una reproducción confirmada. [Referencia MDN](https://developer.mozilla.org/en-US/docs/Web/HTML/Reference/Attributes/disabled).
+
+Se añadió únicamente `autocomplete="off"` a ese botón para optar por no restaurar su estado. No se extendió al componente global de botones, no se usó `suppressHydrationWarning`, no se desactivó SSR y no se alteraron permisos, validación ni operaciones del panel.
+
+La suite `tests/admin/browser.mjs` ahora captura advertencias de hidratación en consola y errores de página. Comprueba HTML autenticado sin JavaScript y su recarga con «Actualizando…» deshabilitado y `autocomplete=off`; después realiza tres recargas de Chrome con datos simulados y verifica habilitación al terminar la carga, sin avisos. Pasaron los **15 grupos de navegador**, además de **22 pruebas locales**, tipos por separado y compilación Webpack. Se conserva el recorrido anterior completo de regresión del panel. Firefox del usuario no fue automatizado y debe confirmar manualmente que el aviso ya no reaparece.

@@ -5,7 +5,11 @@ import { BackendError } from "./errors"
 import { ValidationError } from "./validation"
 
 export function assertOrigin(request: Request) {
-  if (request.headers.get("origin") !== appOrigin() || request.headers.get("sec-fetch-site") === "cross-site") throw new BackendError("FORBIDDEN", "Origen de solicitud no permitido.", 403)
+  const origin = request.headers.get("origin")
+  const configuredOrigin = appOrigin()
+  const localOrigins = ["http://localhost:3000", "http://127.0.0.1:3000", "http://192.168.1.4:3000"]
+  const localMatch = process.env.NODE_ENV === "development" && origin !== null && localOrigins.includes(origin) && new URL(request.url).origin === origin
+  if ((!localMatch && origin !== configuredOrigin) || request.headers.get("sec-fetch-site") === "cross-site") throw new BackendError("FORBIDDEN", "Origen de solicitud no permitido.", 403)
 }
 export async function jsonBody(request: Request): Promise<unknown> {
   if (!request.headers.get("content-type")?.toLowerCase().startsWith("application/json")) throw new ValidationError("Se esperaba contenido JSON.")

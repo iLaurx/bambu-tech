@@ -1,5 +1,27 @@
 # Estado actual de Bambu Tech
 
+## Prompt 5 — integración en curso
+
+El usuario inició sesión y comunicó que creó un producto de prueba y comprobó por su cuenta que aparece al hacerlo visible y desaparece al ocultarlo. El coordinador observó cero coincidencias en lecturas públicas mientras se encontraba oculto; una lectura posterior tampoco lo encontró tras el aviso de publicación, sin poder determinar la causa. El usuario indicó cancelar esa prueba y no modificar más el producto. No se debe reanudar ni modificar sus datos sin una nueva indicación. No se afirma una verificación independiente completa del recorrido real.
+
+El agente verificó 22 pruebas locales y tipos, y añadió `tests/integration/browser.mjs`: recorrido cruzado de panel y catálogo con un único inventario simulado. Pasaron creación oculta, publicación, detalle/WhatsApp y una vista, edición/agotar, ocultación y eliminación lógica con imagen retenida. El primer intento tuvo un selector de prueba en inglés y se corrigió a «Cerrar». No se utilizaron credenciales, enviaron mensajes o modificaron productos reales en estas comprobaciones. Guía y límites en `bambu-tech-app/docs/INTEGRACION.md`. El recorrido integrado real y móvil físico siguen pendientes.
+
+## Entrega del prompt 4 — catálogo conectado
+
+Revisión posterior del aviso de hidratación: la captura mostraba diferencia en `disabled` del botón de actualizar. El HTML real y el primer render usan estado inicial deshabilitado; tres recargas en Chrome limpio no reprodujeron el fallo. Se añadió únicamente `autocomplete="off"` al botón para evitar la restauración de estado que Firefox documenta; es la causa probable, aún no confirmada automáticamente en Firefox. No se ocultaron advertencias ni se desactivó SSR. Se añadió `tests/catalog/hydration-smoke.mjs` y captura de avisos de consola al runner del catálogo.
+
+Verificación posterior al ajuste: 22 pruebas, nueve grupos de navegador del catálogo, tipos y compilación Webpack aprobados. Al retomar, el servidor en 3000 estaba apagado: se inició uno propio con Turbopack sin borrar cachés ni detener procesos ajenos. El coordinador comprobó nuevamente HTML inicial con disabled/autocomplete correctos y tres recargas sin avisos de hidratación, errores de página ni escrituras. El servidor queda disponible para el usuario; falta que recargue su pestaña Firefox y confirme que el aviso no reaparece.
+
+Implementación local terminada y revisada por el coordinador. La página pública ya lee productos y ajustes desde la API real, sin importar `PRODUCTS` ni usar muestras como fallback. Solo muestra activos, incluidos agotados con distintivo. Combina búsqueda por título/marca, cinco categorías, marcas derivadas del inventario público y rangos de precio sin solapamientos. Distingue carga, error, catálogo vacío y filtros sin resultados.
+
+El detalle revalida disponibilidad y datos; una retirada elimina tarjeta/contacto, los cambios de precio se reflejan al actualizar o volver al foco y las respuestas tardías se ignoran tras cerrar o cambiar de producto. Galería de portada más tres secundarias y especificaciones apropiadas sin datos inventados. WhatsApp usa el número persistido y título/precio codificados, también para agotados; sin configuración válida no ofrece enlace. Cada apertura válida intenta incrementar vistas una vez, fuera de efectos React y sin reintentos de escrituras ambiguas. Imágenes por ruta autorizada sin optimización que eluda permisos.
+
+Evidencia final: **22 pruebas locales**, **9 grupos de navegador del catálogo** y **13 grupos de regresión del panel**, todos aprobados; tipos y compilación Webpack final aprobados por separado. Revisión de código y capturas estables de escritorio/móvil aprobada, incluyendo marca de 80 caracteres y ancho interior del detalle. El coordinador comprobó lecturas anónimas reales: portada 200, productos 200 con cero activos e inactivos ausentes, ajustes 200 con WhatsApp configurado. Revisó archivos modificados/nuevos sin encontrar valores de claves reales; configuración privada y capturas permanecen ignoradas, sin contraseña temporal.
+
+Los datos de los recorridos de navegador fueron simulados: no se modificó inventario remoto ni se abrieron enlaces WhatsApp o enviaron correos. No se cambiaron panel, proxy, backend, SQL o configuración Next; se añadieron dos scripts de pruebas sin dependencias nuevas. Imports/includes generados se restauraron y el servidor de pruebas propio se detuvo, conservando el del usuario. Guía: `bambu-tech-app/docs/CATALOGO.md`.
+
+Pendiente el prompt 5: recorrido integrado real panel→catálogo con cuenta e inventario de prueba autorizados, permisos y sesiones en conjunto, móvil físico y demás límites documentados. Esta entrega no completa por sí sola el MVP. No hay commit nuevo, push ni publicación del prompt 4. Los apartados siguientes conservan las entregas previas.
+
 ## Entrega del prompt 3 — panel integrado
 
 Implementación local terminada por el agente de panel y revisada por el coordinador. Rutas públicas exactas `/admin/login` y `/admin/recovery`; el resto de `/admin` conserva autorización y redirige al acceso si falta sesión. Las API mantienen verificación de servidor/RLS. El callback existente abre el formulario de contraseña en el panel; no se cambiaron contraseñas reales durante esta tarea.

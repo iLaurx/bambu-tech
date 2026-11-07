@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import Image from "next/image"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "@/lib/utils"
 
@@ -27,18 +26,15 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
         aria-label={`Fotos de ${alt}`}
         onKeyDown={(e) => {
           if (!hasMany) return
-          if (e.key === "ArrowLeft") go(-1)
-          if (e.key === "ArrowRight") go(1)
+          if (e.key === "ArrowLeft") { e.preventDefault(); go(-1) }
+          if (e.key === "ArrowRight") { e.preventDefault(); go(1) }
         }}
       >
-        <Image
+        <img
           key={photos[current]}
           src={photos[current]}
           alt={`${alt} — foto ${current + 1} de ${photos.length}`}
-          fill
-          sizes="(min-width: 768px) 384px, 100vw"
-          className="object-cover"
-          priority
+          className="absolute inset-0 size-full object-contain"
         />
 
         {hasMany && (
@@ -66,7 +62,7 @@ export function ProductGallery({ images, alt }: ProductGalleryProps) {
                 i === current ? "border-primary" : "border-transparent opacity-60 hover:opacity-100",
               )}
             >
-              <Image src={src} alt="" fill sizes="56px" className="object-cover" />
+              <img src={src} alt="" className="absolute inset-0 size-full object-contain" />
             </button>
           ))}
         </div>

@@ -2,9 +2,13 @@
 
 ## Seguimiento — 6 de noviembre de 2026
 
+El prompt 5 pasó un flujo automatizado panel→catálogo con datos simulados, además de 22 pruebas locales y tipos. El usuario comunicó que comprobó visibilidad/ocultación del producto real y después canceló la prueba con ese producto: no reanudarla ni modificar sus datos sin nueva indicación. La evidencia y sus límites están en `ESTADO_ACTUAL.md` y `bambu-tech-app/docs/INTEGRACION.md`. No autoriza publicación.
+
+El prompt 4 está implementado y revisado: catálogo conectado a API real, filtros, agotados, detalle/galería/specs, WhatsApp y vistas. Guía `bambu-tech-app/docs/CATALOGO.md`. Aprobadas 22 pruebas locales, nueve grupos de catálogo, trece de regresión del panel, tipos, Webpack y revisión visual. Lecturas anónimas reales aprobadas con catálogo vacío y contacto configurado; recorridos con productos simulados. No se modificaron datos remotos, panel, permisos ni esquema. La publicación sigue sin autorización; el prompt 5 requiere el recorrido integrado real y los límites documentados.
+
 El usuario solicitó comenzar por el prompt 2, aprobó el contrato, autorizó un agente backend y posteriormente la configuración y pruebas de su proyecto Supabase. Administrador y WhatsApp ya están configurados; hubo un permiso específico para probar recuperación por correo. Acuerdos en `CONTRATO_BACKEND.md`. No hay autorización de publicación. El coordinador revisa y mantiene documentación, sin implementar código.
 
-El usuario autorizó el prompt 3 y su entrega está implementada y revisada: acceso/recuperación, inventario persistente, métricas, WhatsApp, estados y fotos. Guía `bambu-tech-app/docs/PANEL.md`; 17 pruebas locales, 13 grupos de navegador simulado, tipos y Webpack aprobados. La prueba visual y el acceso anónimo del servidor existente también se revisaron. Falta recorrer la nueva interfaz con la cuenta real del usuario. No hubo nuevos correos, cambios de contraseña real ni mutaciones remotas. El catálogo y esquema siguen intactos; el prompt 4 todavía no se delega y el prompt 5 requiere los recorridos completos.
+El prompt 3 está implementado y revisado: acceso/recuperación, inventario persistente, métricas, WhatsApp, estados y fotos. Guía `bambu-tech-app/docs/PANEL.md`; sus 13 grupos de navegador simulado se volvieron a aprobar tras conectar el catálogo. Falta recorrer la interfaz con la cuenta real del usuario como parte del prompt 5. No hubo nuevos correos, cambios de contraseña real ni mutaciones remotas en los prompts 3 y 4.
 
 El prompt 2 tiene entrega backend revisada en `bambu-tech-app/docs/BACKEND.md`, incluyendo pruebas con Supabase real. Resultados y límites en `ESTADO_ACTUAL.md`. El usuario aprobó imágenes de 4 MiB; el panel futuro debe consumir ese máximo compartido y sustituir su validación original. No iniciar otros agentes sin autorización del usuario para esa siguiente tarea.
 
