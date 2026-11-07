@@ -1,0 +1,73 @@
+\set ON_ERROR_STOP on
+create function public.test_assert(ok boolean,label text) returns void language plpgsql as $$
+begin if ok is distinct from true then raise exception 'Assertion failed: %',label; end if; end; $$;
+insert into auth.users values ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'),('bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb');
+insert into private.admin_users(user_id) values ('aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+insert into storage.objects(bucket_id,name) values ('bambu-products','11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222.webp');
+set role service_role;
+select public.register_asset('22222222-2222-4222-8222-222222222222','11111111-1111-4111-8111-111111111111','aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa');
+reset role;
+set role authenticated;
+set request.jwt.claim.sub = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+select public.test_assert(public.admin_session(),'admin membership');
+select public.save_product('11111111-1111-4111-8111-111111111111','{"title":"Test","category":"Celulares","brand":"Test","price":19.99,"condition":"Nuevo","description":"","specs":{"unlocked":false},"main_image":"11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222.webp","gallery_images":[],"is_active":true,"is_sold":true}',true);
+select public.test_assert((select count(*)=1 from storage.objects),'admin can read validated asset');
+do $$ begin
+  begin perform public.save_product('11111111-1111-4111-8111-111111111111','{"views_count":999}',false); raise exception 'system field accepted'; exception when invalid_parameter_value then null; end;
+  begin update public.products set views_count=99; raise exception 'direct update allowed'; exception when insufficient_privilege then null; end;
+  begin insert into storage.objects(bucket_id,name) values ('bambu-products','fake.webp'); raise exception 'direct upload allowed'; exception when insufficient_privilege then null; end;
+end; $$;
+set request.jwt.claim.sub = 'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb';
+select public.test_assert(not public.admin_session(),'non-admin membership');
+do $$ begin
+  begin perform public.inventory_metrics(); raise exception 'non-admin metrics allowed'; exception when insufficient_privilege then null; end;
+  begin perform public.set_product_states('11111111-1111-4111-8111-111111111111',false,false); raise exception 'non-admin states allowed'; exception when insufficient_privilege then null; end;
+  begin perform public.delete_product('11111111-1111-4111-8111-111111111111'); raise exception 'non-admin delete allowed'; exception when insufficient_privilege then null; end;
+  begin perform public.save_whatsapp('+523312345678'); raise exception 'non-admin settings allowed'; exception when insufficient_privilege then null; end;
+  begin perform public.register_asset(gen_random_uuid(),gen_random_uuid(),'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb'); raise exception 'non-admin registration allowed'; exception when insufficient_privilege then null; end;
+end; $$;
+select public.test_assert((select count(*)=0 from storage.objects),'non-admin direct image denied');
+reset role;
+set role anon;
+set request.jwt.claim.sub = '';
+select public.test_assert((select count(*)=1 from public.products),'active sold visible');
+select public.test_assert(public.image_path('22222222-2222-4222-8222-222222222222') is not null,'active image proxy authorized');
+select public.test_assert((select count(*)=0 from storage.objects),'direct public storage blocked including signing access');
+select public.increment_product_views('11111111-1111-4111-8111-111111111111');
+do $$ begin
+  begin perform public.inventory_metrics(); raise exception 'anon metrics allowed'; exception when insufficient_privilege then null; end;
+  begin update public.products set views_count=99; raise exception 'anon update allowed'; exception when insufficient_privilege then null; end;
+  begin insert into storage.objects(bucket_id,name) values ('bambu-products','fake.webp'); raise exception 'anon upload allowed'; exception when insufficient_privilege then null; end;
+end; $$;
+reset role;
+set role authenticated;
+set request.jwt.claim.sub = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+select public.set_product_states('11111111-1111-4111-8111-111111111111',false,true);
+select public.test_assert((public.inventory_metrics()->>'available')::int=0,'hidden sold not available');
+select public.test_assert((public.inventory_metrics()->>'sold')::int=1,'all sold counted');
+reset role;
+set role anon;
+set request.jwt.claim.sub = '';
+select public.test_assert((select count(*)=0 from public.products),'hidden excluded');
+select public.test_assert(public.image_path('22222222-2222-4222-8222-222222222222') is null,'hidden proxy image denied');
+select public.increment_product_views('11111111-1111-4111-8111-111111111111');
+reset role;
+select public.test_assert((select views_count=1 from public.products),'hidden view not incremented');
+set role authenticated;
+set request.jwt.claim.sub = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa';
+select public.save_product('11111111-1111-4111-8111-111111111111','{"title":"Updated","category":"Celulares","brand":"Test","price":19.99,"condition":"Nuevo","description":"","specs":{},"main_image":"11111111-1111-4111-8111-111111111111/22222222-2222-4222-8222-222222222222.webp","gallery_images":[],"is_active":true,"is_sold":false}',false);
+select public.test_assert((select views_count=1 from public.products),'edit preserves views');
+select public.delete_product('11111111-1111-4111-8111-111111111111');
+select public.test_assert((public.inventory_metrics()->>'total')::int=0,'soft deleted excluded from metrics');
+select public.test_assert((select count(*)=0 from public.products),'soft deleted excluded even admin');
+reset role;
+set role anon;
+set request.jwt.claim.sub = '';
+select public.increment_product_views('11111111-1111-4111-8111-111111111111');
+select public.test_assert(public.image_path('22222222-2222-4222-8222-222222222222') is null,'deleted image denied');
+reset role;
+select public.test_assert((select views_count=1 and deleted_at is not null from public.products),'delete retains row and counter');
+select public.test_assert((select count(*)=1 from storage.objects),'delete retains file');
+-- Restore ONLY as database owner for the isolated concurrency test. No restoration API is shipped.
+update public.products set deleted_at=null,is_active=true;
+select 'SQL access/state checks passed' as result;

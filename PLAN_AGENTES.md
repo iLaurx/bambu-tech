@@ -1,5 +1,15 @@
 # Plan de trabajo y prompts para agentes
 
+## Seguimiento — 6 de noviembre de 2026
+
+El usuario solicitó comenzar por el prompt 2, aprobó el contrato, autorizó un agente backend y posteriormente la configuración y pruebas de su proyecto Supabase. Administrador y WhatsApp ya están configurados; hubo un permiso específico para probar recuperación por correo. Acuerdos en `CONTRATO_BACKEND.md`. No hay autorización de publicación. El coordinador revisa y mantiene documentación, sin implementar código.
+
+Los prompts 3 y 4 todavía no se delegan: deben consumir el contrato entregado por backend y coordinar archivos compartidos. Ninguna interfaz queda integrada por la mera existencia de las nuevas rutas. El prompt 5 requiere además un entorno real de pruebas autorizado para comprobar persistencia, Auth y Storage.
+
+El prompt 2 tiene entrega backend revisada en `bambu-tech-app/docs/BACKEND.md`, incluyendo pruebas con Supabase real. Resultados y límites en `ESTADO_ACTUAL.md`. El usuario aprobó imágenes de 4 MiB; el panel futuro debe consumir ese máximo compartido y sustituir su validación original. No iniciar otros agentes sin autorización del usuario para esa siguiente tarea.
+
+Verificado: proyecto Supabase configurado, registro público desactivado, 30 comprobaciones reales de API aprobadas y recuperación por correo/callback confirmada por el usuario en su navegador. Fixture de recuperación y contraseña temporal retirados. Quedan pruebas explícitas de renovación/expiración y cuenta autenticada no administradora, además de interfaz y recorridos posteriores. No se cambió contraseña. El usuario autorizó commits locales de reorganización y backend; no push ni despliegue.
+
 ## Cómo usar este plan
 
 La aplicación está en `bambu-tech-app/`. Cada agente debe leer `AGENTS.md`, `MVP.md` y `ESTADO_ACTUAL.md` en la raíz de este espacio. Estos prompts son propuestas para que el usuario los asigne: no implican que los agentes ya hayan trabajado ni autorizan crear recursos externos. Antes de implementar, resolver las decisiones de `MVP.md` que afecten el contrato. Si faltan credenciales, preparar y probar lo posible localmente y reportar con precisión los bloqueos.

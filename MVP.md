@@ -6,7 +6,7 @@ Fuente de requisitos: `C:\Users\ele\Downloads\Requerimientos_CatalogoWeb_Admin.p
 
 ## Objetivo y arquitectura requerida
 
-Catálogo público de teléfonos y otros electrónicos para México, con administración privada e interacción comercial por WhatsApp. El PDF prescribe Next.js App Router, Tailwind, Lucide, Server Actions o API Routes en Vercel, Supabase PostgreSQL/Auth/Storage y español de México con moneda MXN. Busca costo inicial cero: es una meta, no una garantía; verificar planes, límites, facturación y disponibilidad antes de contratar o desplegar. No existe evidencia de que el proyecto remoto ya esté configurado.
+Catálogo público de teléfonos y otros electrónicos para México, con administración privada e interacción comercial por WhatsApp. El PDF prescribe Next.js App Router, Tailwind, Lucide, Server Actions o API Routes en Vercel, Supabase PostgreSQL/Auth/Storage y español de México con moneda MXN. Busca costo inicial cero: es una meta, no una garantía; verificar planes, límites, facturación y disponibilidad antes de contratar o desplegar. El proyecto Supabase de prueba ya está configurado y verificado según `ESTADO_ACTUAL.md`; no hay publicación. Las decisiones aprobadas se concretan en `CONTRATO_BACKEND.md`.
 
 ## Modelo funcional
 

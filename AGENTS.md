@@ -20,4 +20,4 @@ Este archivo permite trabajo de implementación a agentes futuros a los que el u
 
 ## Comprobaciones de base
 
-El proyecto declara `pnpm dev`, `pnpm build` y `pnpm start`; tiene `pnpm-lock.yaml` y declara `pnpm@12.3.4`. Revisa la disponibilidad real antes de ejecutar. No hay scripts de lint o pruebas declarados. La configuración actual ignora errores TypeScript en el build: una compilación exitosa no demuestra que los tipos estén correctos; evalúa `pnpm exec tsc --noEmit` por separado cuando corresponda. Evita publicar el proyecto mientras el panel y los datos no estén protegidos y verificados.
+El proyecto declara `pnpm dev`, `pnpm build`, `pnpm start`, `pnpm typecheck` y `pnpm test:backend`; tiene `pnpm-lock.yaml` y declara `pnpm@12.3.4`. Ejecuta desde `bambu-tech-app/` y revisa disponibilidad real. No hay script de lint. La configuración ignora errores TypeScript en el build: comprueba tipos por separado. Las pruebas reales de `tests/backend/supabase-live.mjs` requieren autorización y configuración explícitas; no ejecutarlas como si fueran pruebas locales sin efectos. Evita publicar mientras panel y datos no estén protegidos y verificados.
