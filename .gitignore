@@ -4,3 +4,19 @@
 /.env.*
 !/.env.example
 *.tsbuildinfo
+
+# Historial de trabajo conservado solo en la copia local
+/MVP.md
+/ESTADO_ACTUAL.md
+/PLAN_AGENTES.md
+/CONTRATO_ARQUITECTURA_PROPUESTO.md
+/CONTRATO_BACKEND.md
+/bambu-tech-app/docs/BACKEND.md
+/bambu-tech-app/docs/CATALOGO.md
+/bambu-tech-app/docs/INTEGRACION.md
+/bambu-tech-app/docs/PANEL.md
+
+# Utilidades locales ligadas al proyecto de prueba original
+/bambu-tech-app/scripts/inspect-supabase.mjs
+/bambu-tech-app/scripts/verify-supabase-access.mjs
+/bambu-tech-app/tests/backend/supabase-live.mjs
