@@ -8,11 +8,19 @@ El usuario confirmó que inició sesión desde computadora y celular, revisó el
 
 Son resultados informados por el usuario: el coordinador no observó ni repitió de forma independiente esos recorridos y no se atribuyen como pruebas nuevas a la auditoría en curso. Estas confirmaciones no reanudan la prueba cancelada ni autorizan modificar el producto utilizado en ella. Esta actualización es únicamente documental; no ejecutó pruebas, cambios de aplicación, datos o servicios.
 
-Siguen pendientes de comprobación explícita la renovación/expiración real de sesión, una cuenta autenticada sin permisos administrativos, fallos parciales reales de carga o guardado, el comportamiento del contador ante fallos de red y HTTPS para el acceso con credenciales desde la red local. Las confirmaciones funcionales comunicadas no cierran esos puntos ni constituyen autorización de publicación.
+Siguen pendientes de comprobación explícita la renovación/expiración real de sesión, la cobertura del resto de API administrativas con una cuenta sin rol, fallos parciales reales de carga o guardado y HTTPS para el acceso con credenciales desde la red local. Las confirmaciones funcionales comunicadas no cierran esos puntos ni constituyen autorización de publicación.
+
+Decisión aprobada por el usuario: conservar el contador actual y aceptar la posible pérdida de vistas ante fallos de red. Cada apertura válida intenta registrar una vista sin reintentos automáticos de escrituras ambiguas; si falla la conexión, alguna apertura puede no quedar registrada y el total puede ser inferior al real. Una respuesta perdida tampoco confirma si el incremento llegó a guardarse. Se trata de una limitación conocida y aceptada, no de un pendiente bloqueante; no se modificó código ni se afirma una nueva prueba de fallos.
 
 ### Comprobaciones automatizadas posteriores
 
 Tipos y compilación Webpack aislada aprobados. También pasaron **15 grupos de navegador con servicios simulados**, incluidos el rechazo 401 y la reautenticación conservando el borrador, el fallo y reintento de carga, y el rechazo del proxy a una identidad sin rol con Auth falso. Estas pruebas no verifican expiración/renovación real, fallos de Storage real ni las API administrativas con un usuario real no administrador; esos pendientes se mantienen separados.
+
+### Comprobación real de una cuenta sin rol administrativo
+
+Según el informe del agente de pruebas, se creó bajo autorización una cuenta temporal de Supabase Auth sin rol administrativo. Con esa identidad real, `admin_session` devolvió `false`; `/admin`, `/api/admin/session` y el login de la app devolvieron 403. La cuenta temporal se eliminó por su UUID exacto y una consulta posterior confirmó su ausencia con 404. No se tocaron productos ni se enviaron correos.
+
+La evidencia se limita a esas comprobaciones; no demuestra rechazo del resto de API administrativas ni renovación/expiración real de sesión. Es un resultado real posterior, separado de las confirmaciones del usuario y de las pruebas con Auth falso.
 
 ### Antecedente de la prueba cancelada y evidencia automatizada
 

@@ -14,12 +14,23 @@ Aprobaron tipos, compilación Webpack aislada y **15 grupos de navegador con ser
 
 La cobertura de la identidad sin rol corresponde al proxy simulado, no a las API administrativas con un usuario real no administrador. La carga fallida fue una respuesta simulada y no una avería de Storage real; tampoco se verificó expiración o renovación real de sesión. Estos resultados no cierran los pendientes siguientes.
 
+## Comprobación posterior con una cuenta real sin rol
+
+El agente de pruebas informó que creó bajo autorización una cuenta temporal de Supabase Auth sin rol administrativo y comprobó `admin_session=false`. Con esa identidad, `/admin`, `/api/admin/session` y el login de la app devolvieron 403. No se tocaron productos ni se enviaron correos.
+
+La cuenta temporal se eliminó por su UUID exacto; una consulta posterior confirmó su ausencia con 404. No se afirma haber probado las demás API administrativas con esa identidad, ni se considera verificada la renovación o expiración real de sesión. Esta evidencia real se registra por separado de la suite con Auth falso.
+
+## Decisión aprobada sobre el contador
+
+El usuario decidió conservar el contador actual y aceptar la posible pérdida de vistas cuando falla la red. El cliente intenta incrementar una vez por apertura válida y no reintenta automáticamente una escritura cuyo resultado es ambiguo. Por ello algunas aperturas pueden no registrarse y el total puede ser inferior al real; si se pierde la respuesta, tampoco puede asegurarse desde el cliente si ese incremento quedó guardado.
+
+Esta es una limitación conocida y aceptada, no un pendiente bloqueante. La decisión no modifica la implementación ni equivale a una prueba nueva de fallos de red.
+
 ## Pendientes de comprobación explícita
 
 - Renovación y expiración real de sesiones.
-- Autorización con una cuenta real autenticada que no sea administradora.
+- Cobertura del resto de API administrativas con una cuenta real sin rol; las comprobaciones anteriores solo cubrieron los puntos enumerados.
 - Fallos parciales reales de carga de imágenes, asociación de referencias o guardado.
-- Comportamiento del contador ante fallos de red y respuestas ambiguas.
 - HTTPS para el acceso con credenciales desde la red local; el modo HTTP de desarrollo no verifica esa protección.
 
 Las verificaciones funcionales comunicadas no cierran estos puntos ni prueban por sí solas todos los criterios del MVP. No hay autorización de publicación derivada de este reporte.
