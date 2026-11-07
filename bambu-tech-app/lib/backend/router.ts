@@ -7,6 +7,9 @@ import { BackendError, databaseError } from "./errors"
 import { assertOrigin, endpoint, failure, jsonBody, readLimited } from "./http"
 import { privilegedStorageClient, requireAdmin, sessionClient } from "./supabase"
 import { object, onlyKeys, uuid, ValidationError, whatsappInput } from "./validation"
+import { demoEnabled, demoImageName, demoProducts, demoRequested } from "./demo"
+import { readFile } from "node:fs/promises"
+import { join } from "node:path"
 
 function credential(value: unknown, email = false): string {
   if (typeof value !== "string" || value.length > (email ? 254 : 128) || !value || (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))) throw new ValidationError("Correo o contraseña inválidos.")
@@ -15,6 +18,24 @@ function credential(value: unknown, email = false): string {
 export async function backendRoute(request: Request, segments: string[]): Promise<Response> {
   const path = segments.join("/")
   const method = request.method
+  if (demoRequested()) {
+    if (!demoEnabled()) return failure(new BackendError("UNAVAILABLE", "La demostración solo está disponible en desarrollo.", 503))
+    if (method === "GET" && path === "catalog/products") return endpoint(request, async () => demoProducts)
+    if (method === "GET" && path === "catalog/settings") return endpoint(request, async () => ({ whatsapp_number: null }))
+    if (method === "GET" && /^catalog\/products\/[^/]+$/.test(path)) return endpoint(request, async () => {
+      const product = demoProducts.find(item => item.id === segments[2])
+      if (!product) throw new BackendError("NOT_FOUND", "Producto no encontrado.", 404)
+      return product
+    })
+    if (method === "GET" && /^catalog\/images\/[^/]+$/.test(path)) {
+      const name = demoImageName(segments[2])
+      if (!name) return failure(new BackendError("NOT_FOUND", "Imagen no encontrada.", 404))
+      try { return new Response(await readFile(join(process.cwd(), "public", "phones", name)), { headers: { "Content-Type": "image/png", "Cache-Control": "no-store", "X-Content-Type-Options": "nosniff" } }) }
+      catch { return failure(new BackendError("NOT_FOUND", "Imagen no encontrada.", 404)) }
+    }
+    if (method === "POST" && /^catalog\/products\/[^/]+\/views$/.test(path)) return endpoint(request, async () => ({ accepted: true }))
+    return failure(new BackendError("FORBIDDEN", "No disponible en demostración.", 403))
+  }
   if (method === "GET" && path === "catalog/products") return endpoint(request, listPublicProducts)
   if (method === "GET" && /^catalog\/products\/[^/]+$/.test(path)) return endpoint(request, () => publicProduct(segments[2]))
   if (method === "GET" && path === "catalog/settings") return endpoint(request, publicSettings)

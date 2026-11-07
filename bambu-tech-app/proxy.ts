@@ -3,8 +3,10 @@ import { NextResponse, type NextRequest } from "next/server"
 import { supabaseConfig } from "./lib/backend/config"
 import { failure } from "./lib/backend/http"
 import { BackendError, databaseError } from "./lib/backend/errors"
+import { demoRequested } from "./lib/backend/demo"
 
 export async function proxy(request: NextRequest) {
+  if (demoRequested()) return failure(new BackendError("FORBIDDEN", "El panel no está disponible en demostración.", 403))
   // Only these exact pages are public. Their API calls still enforce the server contract.
   if (["/admin/login", "/admin/recovery"].includes(request.nextUrl.pathname)) {
     const publicPage = NextResponse.next({ request })

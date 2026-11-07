@@ -10,7 +10,7 @@ import { activeProducts, catalogBrands, CatalogError, catalogRequest, filteredPr
 // Firefox can restore a button's old disabled state before hydration. Its supported
 // autocomplete opt-out is spread because React's button typings omit this Firefox attribute.
 const refreshButtonRestoration = { autoComplete: "off" } as const
-export function Catalog() {
+export function Catalog({ demo = false }: { demo?: boolean }) {
   const [products, setProducts] = useState<ProductRecord[]>([])
   const [settings, setSettings] = useState<PublicSettings | null>(null)
   const [query, setQuery] = useState("")
@@ -93,6 +93,7 @@ export function Catalog() {
   const visible = useMemo(() => filteredProducts(products, query, category, brand, priceRange), [products, query, category, brand, priceRange])
   const reset = () => { setQuery(""); setCategory("Todos"); setBrand(""); setPriceRange("all") }
   return <><SiteHeader query={query} onQueryChange={setQuery} /><main className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+    {demo && <p role="status" className="mb-6 rounded-xl border p-4 text-sm font-medium">Demostración: productos y precios de ejemplo. No representan inventario real.</p>}
     <div className="mb-6 flex flex-wrap items-start justify-between gap-4"><div className="grid gap-1"><h1 className="text-balance text-3xl font-semibold tracking-tight sm:text-4xl">Tecnología nueva y reacondicionada</h1><p className="text-muted-foreground">Explora celulares, bocinas, relojes y más.</p></div><button {...refreshButtonRestoration} type="button" disabled={loading} onClick={() => { void loadProducts(); void loadSettings() }} className="inline-flex items-center gap-2 rounded-full border bg-card px-4 py-2 text-sm disabled:opacity-50"><RefreshCw className="size-4" />{loading ? "Actualizando…" : "Actualizar catálogo"}</button></div>
     <CatalogFilters category={category} onCategoryChange={setCategory} brands={brands} brand={brand} onBrandChange={setBrand} priceRange={priceRange} onPriceRangeChange={setPriceRange} />
     {settingsError && <div className="mt-5 rounded-xl border p-3 text-sm"><p>El contacto por WhatsApp no está disponible por el momento.</p><button type="button" onClick={() => void loadSettings()} className="mt-1 text-primary underline">Reintentar contacto</button></div>}
