@@ -2,9 +2,23 @@
 
 ## Prompt 5 — integración en curso
 
+### Confirmaciones posteriores informadas por el usuario
+
+El usuario confirmó que inició sesión desde computadora y celular, revisó el catálogo en el teléfono y comprobó el mensaje de WhatsApp. También comunicó que verificó con datos reales la edición de productos, el estado agotado, la galería y las métricas del panel, además de la persistencia al recargar y cambiar de sesión. Esto amplía su confirmación previa de visibilidad y ocultación.
+
+Son resultados informados por el usuario: el coordinador no observó ni repitió de forma independiente esos recorridos y no se atribuyen como pruebas nuevas a la auditoría en curso. Estas confirmaciones no reanudan la prueba cancelada ni autorizan modificar el producto utilizado en ella. Esta actualización es únicamente documental; no ejecutó pruebas, cambios de aplicación, datos o servicios.
+
+Siguen pendientes de comprobación explícita la renovación/expiración real de sesión, una cuenta autenticada sin permisos administrativos, fallos parciales reales de carga o guardado, el comportamiento del contador ante fallos de red y HTTPS para el acceso con credenciales desde la red local. Las confirmaciones funcionales comunicadas no cierran esos puntos ni constituyen autorización de publicación.
+
+### Comprobaciones automatizadas posteriores
+
+Tipos y compilación Webpack aislada aprobados. También pasaron **15 grupos de navegador con servicios simulados**, incluidos el rechazo 401 y la reautenticación conservando el borrador, el fallo y reintento de carga, y el rechazo del proxy a una identidad sin rol con Auth falso. Estas pruebas no verifican expiración/renovación real, fallos de Storage real ni las API administrativas con un usuario real no administrador; esos pendientes se mantienen separados.
+
+### Antecedente de la prueba cancelada y evidencia automatizada
+
 El usuario inició sesión y comunicó que creó un producto de prueba y comprobó por su cuenta que aparece al hacerlo visible y desaparece al ocultarlo. El coordinador observó cero coincidencias en lecturas públicas mientras se encontraba oculto; una lectura posterior tampoco lo encontró tras el aviso de publicación, sin poder determinar la causa. El usuario indicó cancelar esa prueba y no modificar más el producto. No se debe reanudar ni modificar sus datos sin una nueva indicación. No se afirma una verificación independiente completa del recorrido real.
 
-El agente verificó 22 pruebas locales y tipos, y añadió `tests/integration/browser.mjs`: recorrido cruzado de panel y catálogo con un único inventario simulado. Pasaron creación oculta, publicación, detalle/WhatsApp y una vista, edición/agotar, ocultación y eliminación lógica con imagen retenida. El primer intento tuvo un selector de prueba en inglés y se corrigió a «Cerrar». No se utilizaron credenciales, enviaron mensajes o modificaron productos reales en estas comprobaciones. Guía y límites en `bambu-tech-app/docs/INTEGRACION.md`. El recorrido integrado real y móvil físico siguen pendientes.
+El agente verificó 22 pruebas locales y tipos, y añadió `tests/integration/browser.mjs`: recorrido cruzado de panel y catálogo con un único inventario simulado. Pasaron creación oculta, publicación, detalle/WhatsApp y una vista, edición/agotar, ocultación y eliminación lógica con imagen retenida. El primer intento tuvo un selector de prueba en inglés y se corrigió a «Cerrar». No se utilizaron credenciales, enviaron mensajes o modificaron productos reales en estas comprobaciones. Guía y límites en `bambu-tech-app/docs/INTEGRACION.md`. Las confirmaciones reales posteriores del usuario se registran arriba por separado y no se presentan como resultados de esta suite.
 
 ## Entrega del prompt 4 — catálogo conectado
 

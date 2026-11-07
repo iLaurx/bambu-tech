@@ -1,5 +1,29 @@
 # Integración — prompt 5
 
+## Confirmaciones reales informadas por el usuario
+
+El usuario comunicó que inició sesión en computadora y celular, revisó el catálogo desde el teléfono y comprobó el mensaje de WhatsApp. Además confirmó verificaciones con datos reales de edición de productos, agotado, galería, métricas y persistencia al recargar y cambiar de sesión, junto con la visibilidad y ocultación ya comunicadas anteriormente.
+
+Estos resultados proceden del reporte del usuario. No fueron observados ni repetidos de forma independiente por el coordinador o el agente y no se atribuyen como pruebas nuevas a la auditoría en curso. No se afirma envío o entrega de mensajes WhatsApp a partir de la comprobación de su texto. Esta actualización solo registra la información; no ejecuta pruebas ni modifica aplicación, datos o servicios.
+
+La prueba cancelada con el producto anterior sigue cancelada: no reanudarla ni cambiar sus datos sin una nueva indicación. Las confirmaciones posteriores no cambian ese límite.
+
+## Comprobaciones automatizadas posteriores
+
+Aprobaron tipos, compilación Webpack aislada y **15 grupos de navegador con servicios simulados**. La cobertura incluye rechazo 401 y reautenticación sin perder el borrador, fallo y reintento de carga, y rechazo del proxy a una identidad sin rol usando Auth falso.
+
+La cobertura de la identidad sin rol corresponde al proxy simulado, no a las API administrativas con un usuario real no administrador. La carga fallida fue una respuesta simulada y no una avería de Storage real; tampoco se verificó expiración o renovación real de sesión. Estos resultados no cierran los pendientes siguientes.
+
+## Pendientes de comprobación explícita
+
+- Renovación y expiración real de sesiones.
+- Autorización con una cuenta real autenticada que no sea administradora.
+- Fallos parciales reales de carga de imágenes, asociación de referencias o guardado.
+- Comportamiento del contador ante fallos de red y respuestas ambiguas.
+- HTTPS para el acceso con credenciales desde la red local; el modo HTTP de desarrollo no verifica esa protección.
+
+Las verificaciones funcionales comunicadas no cierran estos puntos ni prueban por sí solas todos los criterios del MVP. No hay autorización de publicación derivada de este reporte.
+
 ## Acceso local desde la red
 
 `pnpm dev:lan` inicia Next enlazado a `192.168.1.4`; muestra esa dirección en Network y permite probar desde el teléfono en la misma red. En este modo `localhost` no escucha: usa `http://192.168.1.4:3000` también en la computadora. El comando normal `pnpm dev` se conserva. La dirección depende de la red Wi-Fi: si cambia, hay que actualizar el script y las direcciones autorizadas para desarrollo. No ejecutes ambas modalidades simultáneamente en el puerto 3000.
@@ -14,8 +38,8 @@ Resultado de esta revisión: aprobado el recorrido crear producto oculto, compro
 
 También aprobaron 22 pruebas locales de backend/panel/catálogo y la comprobación de tipos. Este entorno simulado no verifica por sí mismo JWT reales, persistencia remota o RLS. Las 30 comprobaciones reales previas del backend están en `BACKEND.md`, pero no sustituyen el recorrido de interfaz con el usuario.
 
-## Verificación real interrumpida por el usuario
+## Antecedente: verificación real interrumpida por el usuario
 
 El usuario comunicó que creó un producto de prueba y comprobó personalmente que la visibilidad y ocultación se reflejaban en la tienda. El coordinador hizo lecturas públicas sin modificar datos y observó cero coincidencias tanto cuando se indicó oculto como en una lectura posterior al aviso de publicación; no se determinó la causa de esta diferencia. El usuario canceló expresamente esa prueba y pidió no modificar más el producto. No reanudar ni cambiar sus datos sin una nueva indicación.
 
-Las comprobaciones reales restantes, el móvil físico y otros límites deben registrarse si el usuario decide retomarlos. No afirmar MVP terminado únicamente por las comprobaciones simuladas o por la verificación comunicada de visibilidad.
+En el momento de esa cancelación quedaban sin registrar las demás comprobaciones reales y el móvil físico. Las confirmaciones posteriores se incorporaron al inicio de este documento, con su procedencia y límites; no revocan la cancelación ni equivalen a una nueva prueba independiente. Los pendientes vigentes se enumeran arriba.
