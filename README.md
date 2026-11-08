@@ -25,16 +25,32 @@ Para iniciar con un proyecto Supabase propio, copia `.env.example` como `.env.lo
 | `SUPABASE_PUBLISHABLE_KEY` | Clave publicable o clave `anon` del proyecto. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Clave privilegiada solo para el servidor. Nunca exponerla al navegador ni compartirla. |
 
-No subas `.env.local` ni incluyas credenciales en el código, capturas o mensajes. Las variables de producción se configuran en el alojamiento; las variables locales no se copian automáticamente. Cada persona debe utilizar sus propias credenciales y su propio proyecto.
+En el panel de tu proyecto Supabase, abre **Connect** para consultar la **Project URL** y la clave publicable, o entra a **Settings → API Keys** para ver las claves disponibles. Copia la URL sin añadir `/rest/v1`. La clave `sb_secret_...` (o la antigua `service_role`) corresponde a `SUPABASE_SERVICE_ROLE_KEY`: es privada y solo debe estar en el servidor. La clave `sb_publishable_...` (o la antigua `anon`) corresponde a `SUPABASE_PUBLISHABLE_KEY`.
+
+No subas `.env.local` ni incluyas credenciales en el código, capturas o mensajes. Las variables de producción se configuran en el alojamiento; las variables locales no se copian automáticamente. Cada persona debe utilizar sus propias credenciales y su propio proyecto. Consulta [las claves de API de Supabase](https://supabase.com/docs/guides/getting-started/api-keys).
 
 ## Base de datos y administrador
 
-1. En un proyecto Supabase propio y autorizado, revisa y aplica una sola vez la migración `bambu-tech-app/supabase/migrations/202611060001_backend.sql`. No la ejecutes sobre datos existentes sin revisar compatibilidad; no es una migración repetible.
-2. Mantén privado el bucket `bambu-products` y desactiva el registro público de Auth. Crea la cuenta administradora en Supabase Auth y registra únicamente su UUID existente en `private.admin_users` mediante un operador autorizado. La tabla privada no permite que el usuario se otorgue permisos desde la aplicación.
-3. Configura en Supabase Auth la dirección del sitio y permite exactamente la dirección de retorno formada por `APP_ORIGIN` seguido de `/api/auth/callback`. En producción usa una dirección HTTPS. Comprueba la entrega de correos de recuperación con el proveedor configurado y abre el enlace en el mismo navegador que inició la solicitud.
-4. Inicia sesión en `/admin` y configura el número de WhatsApp desde el panel. Sin número configurado, el contacto permanece deshabilitado. Los productos reales se agregan desde el panel; la demostración no los importa.
+### 1. Aplicar la migración
 
-Para el paso 2, copia el UUID de la cuenta que creaste en Auth y, en el editor SQL del proyecto propio, sustituye el marcador antes de ejecutar:
+1. Abre tu proyecto en el [panel de Supabase](https://supabase.com/dashboard) y selecciona **SQL Editor → New query**.
+2. En tu copia del proyecto, abre `bambu-tech-app/supabase/migrations/202611060001_backend.sql`, copia su contenido completo y pégalo en el editor SQL.
+3. Confirma que elegiste el proyecto correcto y pulsa **Run**. El resultado debe indicar que la consulta se ejecutó correctamente.
+
+Ejecuta esta migración **una sola vez** en una base nueva. Si ya la aplicaste o la base contiene datos, no la repitas sin revisar primero su compatibilidad. La migración crea las tablas, funciones, políticas y el bucket privado `bambu-products`; también deja el número de WhatsApp sin configurar.
+
+### 2. Revisar Storage y desactivar el registro público
+
+1. En el menú lateral, abre **Storage** y localiza el bucket **bambu-products**. Comprueba que sea **Private**, no público. No lo crees otra vez si la migración ya lo creó.
+2. Abre **Authentication → Sign In / Providers**. En la configuración de usuarios, desactiva **Allow new users to sign up** y guarda. Así solo podrán iniciar sesión cuentas existentes; el administrador se crea desde el panel de Supabase, como se indica abajo.
+
+La migración configura un límite de **4 MiB por imagen** para el bucket y acepta WebP; la aplicación valida las imágenes de entrada y las convierte antes de guardarlas. Cada producto admite una portada y hasta tres imágenes secundarias.
+
+### 3. Crear la cuenta administradora
+
+1. Ve a **Authentication → Users → Add user**. Elige la opción para crear un usuario, introduce el correo y la contraseña del administrador y confirma el correo de la cuenta según las opciones que muestre Supabase. No escribas la contraseña en el SQL ni la compartas.
+2. En **Authentication → Users**, localiza la cuenta que acabas de crear y copia su **User UID / ID**. Confirma que corresponde al correo autorizado.
+3. Vuelve a **SQL Editor → New query**. Pega la siguiente sentencia y sustituye únicamente `UUID-DE-LA-CUENTA-AUTORIZADA` por el UUID copiado; conserva las comillas. Después pulsa **Run**:
 
 ```sql
 insert into private.admin_users (user_id)
@@ -42,7 +58,20 @@ values ('UUID-DE-LA-CUENTA-AUTORIZADA'::uuid)
 on conflict (user_id) do nothing;
 ```
 
-Confirma que el UUID pertenece a la persona autorizada antes de ejecutar. La sentencia no crea la cuenta Auth ni asigna permisos a otros usuarios.
+La sentencia agrega esa cuenta a `private.admin_users`. No crea la cuenta de Auth ni cambia contraseñas. Sin esta asignación, una cuenta válida no tiene acceso administrativo.
+
+### 4. Configurar las direcciones de acceso y recuperación
+
+En **Authentication → URL Configuration**:
+
+- En **Site URL**, escribe el origen principal. Para desarrollo local puede ser `http://localhost:3000`; para la página publicada usa su dirección HTTPS, por ejemplo `https://tu-proyecto.vercel.app`.
+- En **Redirect URLs**, agrega la dirección completa de retorno. Para el ejemplo local es `http://localhost:3000/api/auth/callback`; para la página publicada sería `https://tu-proyecto.vercel.app/api/auth/callback`. Conserva ambas si usarás ambos entornos y guarda los cambios.
+
+En cada entorno, `APP_ORIGIN` debe coincidir exactamente con su propia dirección, sin `/` final; el callback se forma añadiendo `/api/auth/callback`. Comprueba la recuperación abriendo el correo en el mismo navegador que inició la solicitud. El correo predeterminado de Supabase tiene restricciones de destinatarios y frecuencia; consulta [su documentación de SMTP](https://supabase.com/docs/guides/auth/auth-smtp) antes de depender de él.
+
+### 5. Configurar WhatsApp y cargar productos
+
+Inicia la aplicación, abre `/admin` y entra con la cuenta autorizada. En el panel, busca **Contacto de la tienda**, escribe el **Número de WhatsApp** con `+` y código de país, y pulsa **Guardar WhatsApp**. Sin número configurado, el contacto permanece deshabilitado. Agrega los productos reales desde el panel: la demostración no los importa.
 
 El almacenamiento usa hasta 4 MiB por imagen y hasta una portada con tres imágenes secundarias. Los productos agotados activos siguen visibles; ocultar y agotar son acciones distintas.
 
