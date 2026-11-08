@@ -1,6 +1,6 @@
 # Demostración local
 
-Esta modalidad muestra tres celulares con imágenes locales y precios ficticios. Se identifica en la tienda como demostración; no representa inventario real. El panel y el acceso administrativo están deshabilitados, WhatsApp no está configurado y las vistas no se guardan. No se conecta con Supabase y no modifica su información.
+Esta modalidad muestra ocho celulares con imágenes locales y precios ficticios. Se identifica en la tienda como demostración; no representa inventario real. El panel y el acceso administrativo están deshabilitados, WhatsApp no está configurado y las vistas no se guardan. No se conecta con Supabase y no modifica su información.
 
 Desde PowerShell, dentro de `bambu-tech-app`, inicia una nueva terminal con:
 

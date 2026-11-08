@@ -4,7 +4,7 @@ Catálogo de electrónica con panel privado, desarrollado con Next.js y Supabase
 
 ## Demostración local
 
-La demostración muestra tres productos y precios de ejemplo con imágenes locales. Es independiente de Supabase: el panel y WhatsApp están deshabilitados y los datos no se guardan. Está disponible solo en desarrollo; no crea productos en una base ni los publica. Consulta [la guía de demostración](bambu-tech-app/docs/DEMOSTRACION.md).
+La demostración muestra ocho productos y precios de ejemplo con imágenes locales. Es independiente de Supabase: el panel y WhatsApp están deshabilitados y los datos no se guardan. Está disponible solo en desarrollo; no crea productos en una base ni los publica. Consulta [la guía de demostración](bambu-tech-app/docs/DEMOSTRACION.md).
 
 ## Instalación
 
