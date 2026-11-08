@@ -14,22 +14,21 @@ Se necesita Node.js compatible con la versión de Next.js del proyecto y pnpm 12
 pnpm install --frozen-lockfile
 ```
 
-Para iniciar con un proyecto Supabase propio, copia `.env.example` como `.env.local` en esa carpeta y configura las variables indicadas abajo. Luego ejecuta `pnpm dev` y abre `http://localhost:3000`.
-
-## Configuración privada
-
-| Variable | Contenido |
-| --- | --- |
-| `APP_ORIGIN` | Origen exacto de la aplicación sin barra final; en producción debe usar HTTPS. |
-| `SUPABASE_URL` | URL del proyecto Supabase propio. |
-| `SUPABASE_PUBLISHABLE_KEY` | Clave publicable o clave `anon` del proyecto. |
-| `SUPABASE_SERVICE_ROLE_KEY` | Clave privilegiada solo para el servidor. Nunca exponerla al navegador ni compartirla. |
-
-En el panel de tu proyecto Supabase, abre **Connect** para consultar la **Project URL** y la clave publicable, o entra a **Settings → API Keys** para ver las claves disponibles. Copia la URL sin añadir `/rest/v1`. La clave `sb_secret_...` (o la antigua `service_role`) corresponde a `SUPABASE_SERVICE_ROLE_KEY`: es privada y solo debe estar en el servidor. La clave `sb_publishable_...` (o la antigua `anon`) corresponde a `SUPABASE_PUBLISHABLE_KEY`.
-
-No subas `.env.local` ni incluyas credenciales en el código, capturas o mensajes. Las variables de producción se configuran en el alojamiento; las variables locales no se copian automáticamente. Cada persona debe utilizar sus propias credenciales y su propio proyecto. Consulta [las claves de API de Supabase](https://supabase.com/docs/guides/getting-started/api-keys).
+Para conectar una base propia, sigue primero la configuración de Supabase y las variables de entorno descritas abajo.
 
 ## Base de datos y administrador
+
+### Crear el proyecto en Supabase
+
+Al crear un proyecto nuevo en el [panel de Supabase](https://supabase.com/dashboard), revisa la sección **Security** y selecciona:
+
+| Opción | Selección | Para qué sirve |
+| --- | --- | --- |
+| **Enable Data API** | Activada | Permite que la aplicación se comunique con la base de datos mediante la API de Supabase. |
+| **Automatically expose new tables** | Desactivada | Evita conceder automáticamente acceso mediante la Data API a las tablas nuevas. |
+| **Enable automatic RLS** | Activada | Activa automáticamente la seguridad por filas en tablas nuevas del esquema público. |
+
+La migración del siguiente paso activa RLS y define permisos y políticas para las tablas de Bambu Tech. No configura estas opciones generales del proyecto; la protección automática sirve además para tablas que se creen después. Consulta [cómo proteger la Data API](https://supabase.com/docs/guides/api/securing-your-api).
 
 ### 1. Aplicar la migración
 
@@ -60,18 +59,48 @@ on conflict (user_id) do nothing;
 
 La sentencia agrega esa cuenta a `private.admin_users`. No crea la cuenta de Auth ni cambia contraseñas. Sin esta asignación, una cuenta válida no tiene acceso administrativo.
 
-### 4. Configurar las direcciones de acceso y recuperación
+### 4. Obtener las claves y configurar el entorno local
 
-En **Authentication → URL Configuration**:
+1. En tu proyecto de Supabase, abre **Connect** para consultar la **Project URL** y la clave publicable. Copia la URL del proyecto sin agregar `/rest/v1`.
+2. En **Settings → API Keys**, consulta las claves **Publishable** y **Secret**. También se admiten las claves antiguas `anon` y `service_role`, respectivamente. La clave secreta tiene acceso privilegiado: úsala solo en el servidor y no la compartas. Consulta [las claves de API de Supabase](https://supabase.com/docs/guides/getting-started/api-keys).
+3. Dentro de `bambu-tech-app`, copia `.env.example` con el nombre `.env.local`. Edita el archivo y completa las siguientes variables con los datos de **tu propio proyecto**, sin espacios alrededor de `=`:
+
+| Variable | Valor para desarrollo local |
+| --- | --- |
+| `APP_ORIGIN` | `http://localhost:3000`, sin `/` al final. |
+| `SUPABASE_URL` | **Project URL** de Supabase. |
+| `SUPABASE_PUBLISHABLE_KEY` | Clave **Publishable** (`sb_publishable_...`) o la antigua `anon`. |
+| `SUPABASE_SERVICE_ROLE_KEY` | Clave **Secret** (`sb_secret_...`) o la antigua `service_role`; solo para el servidor. |
+
+No subas `.env.local` ni incluyas claves en el código, capturas o mensajes. El archivo local está ignorado por Git y no se copia automáticamente a Vercel.
+
+### 5. Configurar las direcciones de acceso y recuperación
+
+En **Authentication → URL Configuration** configura primero el acceso local. Si todavía no conoces la dirección de Vercel, vuelve a esta sección para agregar la dirección publicada después del paso 6:
 
 - En **Site URL**, escribe el origen principal. Para desarrollo local puede ser `http://localhost:3000`; para la página publicada usa su dirección HTTPS, por ejemplo `https://tu-proyecto.vercel.app`.
 - En **Redirect URLs**, agrega la dirección completa de retorno. Para el ejemplo local es `http://localhost:3000/api/auth/callback`; para la página publicada sería `https://tu-proyecto.vercel.app/api/auth/callback`. Conserva ambas si usarás ambos entornos y guarda los cambios.
 
 En cada entorno, `APP_ORIGIN` debe coincidir exactamente con su propia dirección, sin `/` final; el callback se forma añadiendo `/api/auth/callback`. Comprueba la recuperación abriendo el correo en el mismo navegador que inició la solicitud. El correo predeterminado de Supabase tiene restricciones de destinatarios y frecuencia; consulta [su documentación de SMTP](https://supabase.com/docs/guides/auth/auth-smtp) antes de depender de él.
 
-### 5. Configurar WhatsApp y cargar productos
+### 6. Configurar las variables en Vercel
 
-Inicia la aplicación, abre `/admin` y entra con la cuenta autorizada. En el panel, busca **Contacto de la tienda**, escribe el **Número de WhatsApp** con `+` y código de país, y pulsa **Guardar WhatsApp**. Sin número configurado, el contacto permanece deshabilitado. Agrega los productos reales desde el panel: la demostración no los importa.
+Si vas a publicar la aplicación, crea o selecciona tu proyecto en Vercel e importa el repositorio. En la configuración del proyecto, selecciona **`bambu-tech-app`** como **Root Directory**. Antes de publicar, identifica en **Settings → Domains** cuál será la dirección HTTPS principal; Vercel también puede asignar un dominio `.vercel.app`.
+
+1. Abre **Settings → Environment Variables**. No es necesario crear un entorno nuevo: elige **Production** en el selector de cada variable.
+2. Agrega `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY` y `SUPABASE_SERVICE_ROLE_KEY` con los valores de tu propio proyecto Supabase. Márcala como sensible si Vercel ofrece esa opción, especialmente la clave privilegiada.
+3. Agrega `APP_ORIGIN` con la dirección HTTPS principal exacta, por ejemplo `https://tu-proyecto.vercel.app`, sin `/` final. Debe coincidir con la dirección configurada en el paso 5; agrega también su callback exacto a **Redirect URLs** en Supabase.
+4. Guarda las variables e inicia el despliegue cuando hayas revisado la configuración. Los cambios en variables se aplican a nuevos despliegues; si ya desplegaste, crea un nuevo despliegue para aplicarlos. Consulta [variables de entorno en Vercel](https://vercel.com/docs/environment-variables).
+
+**Importante:** `APP_ORIGIN` no debe terminar en `/`. Por ejemplo, `https://tu-proyecto.vercel.app` es correcto y `https://tu-proyecto.vercel.app/` es incorrecto. Una barra final hace que la aplicación considere inválida la configuración y puede mostrar «El servicio todavía no está configurado» al intentar iniciar sesión. Si la corriges en Vercel, haz un redeploy para aplicar el cambio; puedes seguir usando el mismo dominio principal asignado.
+
+**Alternativa: importar varias variables a la vez.** En el formulario de variables de Vercel puedes pegar el contenido de un archivo `.env` para rellenar los campos; si la interfaz ofrece importar un archivo, también puedes seleccionarlo. Puedes partir de `bambu-tech-app/.env.example`, que contiene los nombres de las cuatro variables, pero **sus claves están vacías**: reemplázalas con los valores de tu propio proyecto Supabase. También puedes usar tu `.env.local` ya completado. En ambos casos, revisa las variables importadas antes de guardar: cambia `APP_ORIGIN` de `http://localhost:3000` a la dirección HTTPS principal de Vercel, selecciona **Production** y comprueba que las tres variables de Supabase tengan sus valores correctos. Nunca pegues este contenido en GitHub, capturas ni mensajes.
+
+Estas variables solo deben asignarse a los entornos que las necesiten. Un **Preview** conectado a la misma base comparte productos y ajustes con producción; no añadas claves privilegiadas a vistas previas sin revisar sus permisos y su dirección.
+
+### 7. Configurar WhatsApp y cargar productos
+
+Para probar localmente, ejecuta `pnpm dev` desde `bambu-tech-app` y abre `http://localhost:3000/admin`. En la versión publicada, abre `/admin` en la dirección HTTPS principal. Entra con la cuenta autorizada; en el panel, busca **Contacto de la tienda**, escribe el **Número de WhatsApp** con `+` y código de país, y pulsa **Guardar WhatsApp**. Sin número configurado, el contacto permanece deshabilitado. Agrega los productos reales desde el panel: la demostración no los importa.
 
 El almacenamiento usa hasta 4 MiB por imagen y hasta una portada con tres imágenes secundarias. Los productos agotados activos siguen visibles; ocultar y agotar son acciones distintas.
 
